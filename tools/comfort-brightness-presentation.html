@@ -102,6 +102,12 @@
         color: #fff;
       }
 
+      .button.presenter {
+        border-color: #45c29a;
+        background: #15936f;
+        color: #fff;
+      }
+
       .presentation-shell {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 176px;
@@ -199,6 +205,132 @@
         object-fit: cover;
       }
 
+      .speaker-panel {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 18px;
+        margin-top: 16px;
+        border: 1px solid rgba(130, 174, 218, 0.2);
+        border-radius: 16px;
+        padding: 18px;
+        background: rgba(8, 19, 33, 0.92);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+      }
+
+      .speaker-note-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .speaker-note-head h2,
+      .next-preview h2 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .speaker-note-head span,
+      .presenter-guide {
+        color: #8fa9c5;
+        font-size: 13px;
+      }
+
+      .speaker-note-text {
+        min-height: 88px;
+        margin: 0;
+        color: #e7f2ff;
+        font-size: 16px;
+        line-height: 1.85;
+      }
+
+      .presenter-guide {
+        margin: 14px 0 0;
+        border-top: 1px solid rgba(130, 174, 218, 0.15);
+        padding-top: 12px;
+        line-height: 1.65;
+      }
+
+      .next-preview {
+        min-width: 0;
+      }
+
+      .next-preview img {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        border: 1px solid rgba(130, 174, 218, 0.2);
+        border-radius: 10px;
+        background: #020408;
+        aspect-ratio: 16 / 9;
+        object-fit: contain;
+      }
+
+      .next-preview span {
+        display: block;
+        margin-top: 8px;
+        color: #8fa9c5;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .audience-fullscreen {
+        display: none;
+      }
+
+      body.audience-mode {
+        overflow: hidden;
+        background: #020408;
+      }
+
+      body.audience-mode .page {
+        width: 100vw;
+        height: 100vh;
+        padding: 0;
+      }
+
+      body.audience-mode .topbar,
+      body.audience-mode .controlbar,
+      body.audience-mode .thumbnails,
+      body.audience-mode .speaker-panel,
+      body.audience-mode .platform-ai-assistant {
+        display: none !important;
+      }
+
+      body.audience-mode .presentation-shell {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      body.audience-mode .viewer {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+      }
+
+      body.audience-mode .stage {
+        width: 100%;
+        height: 100%;
+        aspect-ratio: auto;
+      }
+
+      body.audience-mode .audience-fullscreen {
+        position: fixed;
+        top: 14px;
+        right: 14px;
+        z-index: 5;
+        display: inline-flex;
+        opacity: 0.2;
+      }
+
+      body.audience-mode .audience-fullscreen:hover,
+      body.audience-mode .audience-fullscreen:focus-visible {
+        opacity: 1;
+      }
+
       .presentation-shell:fullscreen {
         grid-template-columns: 1fr;
         width: 100vw;
@@ -238,6 +370,14 @@
 
         .presentation-shell {
           grid-template-columns: 1fr;
+        }
+
+        .speaker-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .next-preview {
+          max-width: 320px;
         }
 
         .thumbnails {
@@ -285,7 +425,8 @@
         </div>
         <div class="top-actions">
           <a class="button" href="dynamic-comfort-brightness.html">返回模型</a>
-          <a class="button" href="../data/presentations/人眼舒适亮度模型项目汇报6.22.pptx" download>下载原始 PPT</a>
+          <a class="button" href="../data/presentations/人眼舒适亮度模型项目汇报6.22.pptx" download>下载含备注的 PPT</a>
+          <button class="button presenter" id="presenterButton" type="button">开启演讲者模式</button>
           <button class="button primary" id="fullscreenButton" type="button">全屏汇报</button>
         </div>
       </header>
@@ -306,27 +447,72 @@
         </div>
         <aside class="thumbnails" id="thumbnails" aria-label="幻灯片缩略图"></aside>
       </section>
+
+      <section class="speaker-panel" aria-label="演讲备注">
+        <div>
+          <div class="speaker-note-head">
+            <h2>演讲备注</h2>
+            <span id="speakerSlideLabel">第 1 页</span>
+          </div>
+          <p class="speaker-note-text" id="speakerNote"></p>
+          <p class="presenter-guide" id="presenterGuide">点击“开启演讲者模式”后，将新打开的观众窗口拖到投影屏，并点击右上角“全屏放映”。本窗口用于翻页和查看备注。</p>
+        </div>
+        <aside class="next-preview">
+          <h2>下一页预览</h2>
+          <img id="nextSlideImage" src="../data/presentations/人眼舒适亮度模型项目汇报6.22/slide-02.png" alt="下一页预览" />
+          <span id="nextSlideLabel">第 2 页</span>
+        </aside>
+      </section>
     </main>
+
+    <button class="button audience-fullscreen" id="audienceFullscreenButton" type="button">全屏放映</button>
 
     <script>
       (() => {
         const totalSlides = 10;
+        const speakerNotes = [
+          "开场：今天汇报的重点不是再做一次论文分享，而是把之前关于感知亮度、瞳孔和视网膜成像亮度的研读，进一步落到一个可以实验验证、可以形成电视产品策略的人眼舒适亮度模型。",
+          "这一页讲背景。电视行业常见说法是峰值亮度、HDR亮度、画质参数，但真实家庭场景非常复杂。白天、客厅、夜间、HDR高光和字幕，对人的感受完全不同。所以我们要解决的不是单纯亮度更高，而是在不同场景下找到舒适亮度。",
+          "这一页承接原PPT中的人眼结构和明暗视觉。关键要讲清楚：屏幕物理亮度不是用户感受到的亮度。人眼在不同光环境下会切换视觉状态，瞳孔和感光细胞敏感度变化，会让同样的电视亮度产生完全不同的感受。",
+          "这一页是整个项目的理论中心。之前论文最有价值的点，是把感知亮度从主观描述转成可计算的视网膜成像亮度。它告诉我们：用户觉得亮不亮，不只取决于屏幕亮度，而是屏幕亮度乘以瞳孔面积，也就是进入眼睛的有效光量。",
+          "这一页要强调不要把护眼简单理解为降低亮度。亮度太低会看不清，亮度太高会刺眼。我们的目标是找到最舒适的视网膜刺激区间，并让电视的亮度、高光、字幕和暗部细节围绕这个区间动态调节。",
+          "这一页讲模型结构。它不是单变量自动亮度，而是一个四层系统：输入层采集环境光和视频内容，生理层估算瞳孔和视网膜亮度，舒适评价层判断刺眼、字幕、高光和疲劳，最后输出电视可控制的背光、Gamma、Tone Mapping等参数。",
+          "这一页讲执行路径。我们不建议一开始就做大而全，而是先用静态实验复现论文机制，再建立舒适度函数，再进入真实电视内容，最后与传统自动亮度做A/B对比。这样每一步都有明确输出和验收标准。",
+          "这一页讲数据怎么来。眼动仪的价值在于记录瞳孔直径和注视区域。我们会把眼动数据、电视画面亮度数据、环境照度和用户评分做时间对齐，这样主观的舒适和刺眼就能被转化成可训练、可验证的模型数据。",
+          "这一页讲项目价值。最终不是只给某个模式调高或调低亮度，而是形成数据库、模型和算法。它可以落到夜间模式、字幕柔光、HDR舒适、高龄用户画质，以及用户长期偏好学习。这样对产品、算法和画质都有可用价值。",
+          "最后收束到下一步。建议先不要铺太大，先做六到八周MVP。要的支持包括场地、设备、电视样机、画质与算法协作、被试和内容数据工具。最后强调这件事的价值是把亮度策略从经验调参变成有生理依据、有实验数据的模型。"
+        ];
+        const isAudienceMode = new URLSearchParams(location.search).get("audience") === "1";
         const slideImage = document.getElementById("slideImage");
         const slideCount = document.getElementById("slideCount");
         const thumbnails = document.getElementById("thumbnails");
         const presentationShell = document.getElementById("presentationShell");
         const fullscreenButton = document.getElementById("fullscreenButton");
+        const presenterButton = document.getElementById("presenterButton");
+        const speakerNote = document.getElementById("speakerNote");
+        const speakerSlideLabel = document.getElementById("speakerSlideLabel");
+        const nextSlideImage = document.getElementById("nextSlideImage");
+        const nextSlideLabel = document.getElementById("nextSlideLabel");
+        const presenterGuide = document.getElementById("presenterGuide");
+        const syncChannel = "BroadcastChannel" in window ? new BroadcastChannel("comfort-brightness-presentation-v1") : null;
         let currentSlide = Math.min(totalSlides, Math.max(1, Number(location.hash.slice(1)) || 1));
+        document.body.classList.toggle("audience-mode", isAudienceMode);
 
         function slidePath(number) {
           return `../data/presentations/人眼舒适亮度模型项目汇报6.22/slide-${String(number).padStart(2, "0")}.png`;
         }
 
-        function showSlide(number) {
+        function showSlide(number, broadcast = true) {
           currentSlide = Math.min(totalSlides, Math.max(1, number));
           slideImage.src = slidePath(currentSlide);
           slideImage.alt = `汇报第 ${currentSlide} 页`;
           slideCount.textContent = `${currentSlide} / ${totalSlides}`;
+          speakerNote.textContent = speakerNotes[currentSlide - 1] || "本页暂无备注。";
+          speakerSlideLabel.textContent = `第 ${currentSlide} 页`;
+          const nextSlide = Math.min(totalSlides, currentSlide + 1);
+          nextSlideImage.src = slidePath(nextSlide);
+          nextSlideImage.alt = currentSlide === totalSlides ? "当前为最后一页" : `第 ${nextSlide} 页预览`;
+          nextSlideLabel.textContent = currentSlide === totalSlides ? "已到最后一页" : `第 ${nextSlide} 页`;
           document.querySelectorAll(".thumbnail").forEach((button, index) => {
             const active = index + 1 === currentSlide;
             button.classList.toggle("active", active);
@@ -336,6 +522,10 @@
             }
           });
           history.replaceState(null, "", `#${currentSlide}`);
+          if (broadcast) {
+            syncChannel?.postMessage({ type: "slide", number: currentSlide });
+            localStorage.setItem("comfort-brightness-slide", String(currentSlide));
+          }
         }
 
         for (let number = 1; number <= totalSlides; number += 1) {
@@ -350,6 +540,16 @@
 
         document.getElementById("previousButton").addEventListener("click", () => showSlide(currentSlide - 1));
         document.getElementById("nextButton").addEventListener("click", () => showSlide(currentSlide + 1));
+        presenterButton.addEventListener("click", () => {
+          const audienceUrl = new URL(location.href);
+          audienceUrl.searchParams.set("audience", "1");
+          audienceUrl.hash = String(currentSlide);
+          const audienceWindow = window.open(audienceUrl, "comfortBrightnessAudience", "width=1280,height=720");
+          presenterGuide.textContent = audienceWindow
+            ? "观众窗口已打开：将它拖到投影屏并点击右上角“全屏放映”。之后在本窗口翻页，投屏画面会同步变化。"
+            : "浏览器拦截了观众窗口，请允许此网站打开弹出式窗口后重试。";
+          audienceWindow?.focus();
+        });
         fullscreenButton.addEventListener("click", async () => {
           if (document.fullscreenElement) {
             await document.exitFullscreen();
@@ -359,6 +559,23 @@
         });
         document.addEventListener("fullscreenchange", () => {
           fullscreenButton.textContent = document.fullscreenElement ? "退出全屏" : "全屏汇报";
+        });
+        document.getElementById("audienceFullscreenButton").addEventListener("click", async () => {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          } else {
+            await document.documentElement.requestFullscreen();
+          }
+        });
+        syncChannel?.addEventListener("message", (event) => {
+          if (event.data?.type === "slide") {
+            showSlide(Number(event.data.number), false);
+          }
+        });
+        window.addEventListener("storage", (event) => {
+          if (event.key === "comfort-brightness-slide" && event.newValue) {
+            showSlide(Number(event.newValue), false);
+          }
         });
         document.addEventListener("keydown", (event) => {
           const nextKeys = ["ArrowRight", "ArrowDown", "PageDown", " "];
@@ -376,7 +593,7 @@
           }
         });
 
-        showSlide(currentSlide);
+        showSlide(currentSlide, false);
       })();
     </script>
     <script src="../assets/platform-assistant.js?v=20260622-ai-consistent-v1"></script>
