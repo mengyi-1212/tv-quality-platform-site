@@ -414,6 +414,95 @@
           padding: 8px;
         }
       }
+
+      body.presenter-mode {
+        overflow: hidden;
+      }
+
+      body.presenter-mode .page {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) 190px;
+        width: min(1480px, calc(100% - 28px));
+        height: 100vh;
+        padding: 12px 0 14px;
+      }
+
+      body.presenter-mode .topbar {
+        margin-bottom: 10px;
+      }
+
+      body.presenter-mode .presentation-shell,
+      body.presenter-mode .viewer,
+      body.presenter-mode .stage {
+        min-height: 0;
+        height: 100%;
+      }
+
+      body.presenter-mode .stage {
+        aspect-ratio: auto;
+      }
+
+      body.presenter-mode .controlbar {
+        min-height: 52px;
+        padding: 6px 12px;
+      }
+
+      body.presenter-mode .thumbnails {
+        height: 100%;
+        max-height: none;
+      }
+
+      body.presenter-mode .speaker-panel {
+        min-height: 0;
+        max-height: 180px;
+        margin-top: 10px;
+        padding: 14px 16px;
+        overflow: hidden;
+        border-color: rgba(69, 194, 154, 0.48);
+        box-shadow: 0 0 0 3px rgba(69, 194, 154, 0.08);
+      }
+
+      body.presenter-mode .speaker-note-text {
+        min-height: 0;
+        max-height: 92px;
+        overflow: auto;
+        font-size: 15px;
+        line-height: 1.65;
+      }
+
+      body.presenter-mode .presenter-guide {
+        margin-top: 7px;
+        padding-top: 7px;
+        color: #71d8b5;
+        line-height: 1.45;
+      }
+
+      body.presenter-mode .next-preview img {
+        max-height: 105px;
+        margin-top: 7px;
+      }
+
+      body.presenter-mode .next-preview span {
+        margin-top: 5px;
+      }
+
+      @media (max-width: 900px) {
+        body.presenter-mode {
+          overflow: auto;
+        }
+
+        body.presenter-mode .page {
+          display: block;
+          width: min(100% - 24px, 760px);
+          height: auto;
+          padding: 14px 0 24px;
+        }
+
+        body.presenter-mode .speaker-panel {
+          max-height: none;
+          overflow: visible;
+        }
+      }
     </style>
   </head>
   <body>
@@ -455,7 +544,7 @@
             <span id="speakerSlideLabel">第 1 页</span>
           </div>
           <p class="speaker-note-text" id="speakerNote"></p>
-          <p class="presenter-guide" id="presenterGuide">点击“开启演讲者模式”后，将新打开的观众窗口拖到投影屏，并点击右上角“全屏放映”。本窗口用于翻页和查看备注。</p>
+          <p class="presenter-guide" id="presenterGuide">先按 Win + P 选择“扩展”，再点击“开启演讲者模式”。将新打开的观众窗口拖到投影屏并全屏，本窗口用于翻页和查看备注。</p>
         </div>
         <aside class="next-preview">
           <h2>下一页预览</h2>
@@ -482,7 +571,9 @@
           "这一页讲项目价值。最终不是只给某个模式调高或调低亮度，而是形成数据库、模型和算法。它可以落到夜间模式、字幕柔光、HDR舒适、高龄用户画质，以及用户长期偏好学习。这样对产品、算法和画质都有可用价值。",
           "最后收束到下一步。建议先不要铺太大，先做六到八周MVP。要的支持包括场地、设备、电视样机、画质与算法协作、被试和内容数据工具。最后强调这件事的价值是把亮度策略从经验调参变成有生理依据、有实验数据的模型。"
         ];
-        const isAudienceMode = new URLSearchParams(location.search).get("audience") === "1";
+        const pageParams = new URLSearchParams(location.search);
+        const isAudienceMode = pageParams.get("audience") === "1";
+        const isPresenterMode = pageParams.get("presenter") === "1";
         const slideImage = document.getElementById("slideImage");
         const slideCount = document.getElementById("slideCount");
         const thumbnails = document.getElementById("thumbnails");
@@ -497,6 +588,11 @@
         const syncChannel = "BroadcastChannel" in window ? new BroadcastChannel("comfort-brightness-presentation-v1") : null;
         let currentSlide = Math.min(totalSlides, Math.max(1, Number(location.hash.slice(1)) || 1));
         document.body.classList.toggle("audience-mode", isAudienceMode);
+        document.body.classList.toggle("presenter-mode", isPresenterMode && !isAudienceMode);
+        if (isPresenterMode && !isAudienceMode) {
+          presenterButton.textContent = "重新打开观众窗口";
+          presenterGuide.textContent = "当前窗口是演讲者视图：备注已固定在首屏下方。将观众窗口拖到投影屏；如果两块屏幕内容相同，请按 Win + P 选择“扩展”。";
+        }
 
         function slidePath(number) {
           return `../data/presentations/人眼舒适亮度模型项目汇报6.22/slide-${String(number).padStart(2, "0")}.png`;
@@ -541,14 +637,27 @@
         document.getElementById("previousButton").addEventListener("click", () => showSlide(currentSlide - 1));
         document.getElementById("nextButton").addEventListener("click", () => showSlide(currentSlide + 1));
         presenterButton.addEventListener("click", () => {
-          const audienceUrl = new URL(location.href);
+          document.body.classList.add("presenter-mode");
+          presenterButton.textContent = "重新打开观众窗口";
+          const presenterUrl = new URL(location.href);
+          presenterUrl.searchParams.delete("audience");
+          presenterUrl.searchParams.set("presenter", "1");
+          presenterUrl.hash = String(currentSlide);
+          history.replaceState(null, "", presenterUrl);
+          window.scrollTo({ top: 0, behavior: "auto" });
+
+          const audienceUrl = new URL(presenterUrl);
+          audienceUrl.searchParams.delete("presenter");
           audienceUrl.searchParams.set("audience", "1");
           audienceUrl.hash = String(currentSlide);
           const audienceWindow = window.open(audienceUrl, "comfortBrightnessAudience", "width=1280,height=720");
           presenterGuide.textContent = audienceWindow
-            ? "观众窗口已打开：将它拖到投影屏并点击右上角“全屏放映”。之后在本窗口翻页，投屏画面会同步变化。"
+            ? "当前窗口是演讲者视图，备注已固定显示。请把观众窗口拖到投影屏并点击“全屏放映”；若两屏相同，请按 Win + P 选择“扩展”。"
             : "浏览器拦截了观众窗口，请允许此网站打开弹出式窗口后重试。";
-          audienceWindow?.focus();
+          window.setTimeout(() => {
+            audienceWindow?.blur();
+            window.focus();
+          }, 180);
         });
         fullscreenButton.addEventListener("click", async () => {
           if (document.fullscreenElement) {
