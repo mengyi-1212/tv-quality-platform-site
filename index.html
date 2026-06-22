@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>画质数据分析与辅助工具平台</title>
     <link rel="stylesheet" href="assets/styles.css?v=20260622-comfort-ppt-v1" />
+    <link rel="stylesheet" href="assets/platform-assistant.css?v=20260622-ai-consistent-v1" />
   </head>
   <body data-active-view="home">
     <div class="app-shell">
@@ -71,47 +72,6 @@
         </header>
 
         <div class="notice" id="appNotice" hidden></div>
-
-        <aside class="ai-assistant-panel is-collapsed" id="aiAssistantPanel" aria-label="AI助手">
-          <button class="ai-bunny-trigger" type="button" id="aiAssistantToggle" aria-label="唤醒AI助手" aria-expanded="false" aria-controls="aiAssistantDialog">
-            <div class="ai-bunny-avatar" aria-hidden="true">
-              <span class="ai-bunny-ear ai-bunny-ear-left">
-                <span></span>
-              </span>
-              <span class="ai-bunny-ear ai-bunny-ear-right">
-                <span></span>
-              </span>
-              <span class="ai-bunny-face">
-                <span class="ai-bunny-eye ai-bunny-eye-left"></span>
-                <span class="ai-bunny-eye ai-bunny-eye-right"></span>
-                <span class="ai-bunny-nose"></span>
-                <span class="ai-bunny-mouth"></span>
-                <span class="ai-bunny-cheek ai-bunny-cheek-left"></span>
-                <span class="ai-bunny-cheek ai-bunny-cheek-right"></span>
-              </span>
-              <span class="ai-bunny-paw"></span>
-            </div>
-          </button>
-          <div class="ai-assistant-dialog" id="aiAssistantDialog" aria-hidden="true">
-            <div class="ai-assistant-head">
-              <div>
-                <span class="ai-kicker">AI Assistant</span>
-                <h2>AI助手</h2>
-              </div>
-              <button class="ai-assistant-close" type="button" id="aiAssistantClose" title="收起AI助手" aria-label="收起AI助手">
-                <i data-lucide="x"></i>
-              </button>
-            </div>
-            <label class="ai-search-box">
-              <span>输入你要找的信息或工具</span>
-              <textarea id="aiAssistantInput" rows="4" placeholder="例如：打开色域转换、查找TCL75Q9M报告、生成PPT、亮度数据、Real Scene"></textarea>
-            </label>
-            <div class="ai-scope">当前范围：<strong id="aiAssistantScope">平台资料</strong></div>
-            <div class="ai-quick-prompts" id="aiQuickPrompts" aria-label="常用搜索"></div>
-            <div class="ai-answer" id="aiAssistantAnswer" aria-live="polite"></div>
-            <div class="ai-results" id="aiAssistantResults" aria-live="polite" aria-label="搜索结果"></div>
-          </div>
-        </aside>
 
         <section class="view-panel portal-panel is-active" data-view-panel="home">
           <div class="portal-grid">
@@ -493,16 +453,6 @@
               <em>进入模块 →</em>
             </a>
 
-            <article class="converter-tool-card presentation-tool-card">
-              <span class="converter-tool-icon"><i data-lucide="presentation"></i></span>
-              <strong>人眼舒适亮度模型项目汇报</strong>
-              <span>Comfort Brightness Project Presentation · 6.22</span>
-              <div class="presentation-card-actions">
-                <a href="tools/comfort-brightness-presentation.html">打开汇报</a>
-                <a href="data/presentations/人眼舒适亮度模型项目汇报6.22.pptx" download>下载 PPT</a>
-              </div>
-            </article>
-
             <a class="converter-tool-card" href="tools/hisense-bc-application.html?v=20260609-bc">
               <span class="converter-tool-icon"><i data-lucide="blocks"></i></span>
               <strong>海信四色B/C应用</strong>
@@ -812,5 +762,6 @@
     <script defer src="data/sample-data.js?v=20260612-eye-lr-system"></script>
     <script defer src="data/raw-manifest.js?v=20260612-eye-lr-system"></script>
     <script defer src="assets/app.js?v=20260622-comfort-ppt-v2"></script>
+    <script defer src="assets/platform-assistant.js?v=20260622-ai-consistent-v1"></script>
   </body>
 </html>

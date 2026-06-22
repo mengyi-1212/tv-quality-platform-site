@@ -17,10 +17,19 @@
   widget.setAttribute("aria-label", "AI助手");
   widget.innerHTML = `
     <button class="platform-ai-trigger" id="platformAiTrigger" type="button" aria-label="唤醒AI助手" aria-expanded="false">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 3l1.1 3.2L16 7.5l-2.9 1.3L12 12l-1.1-3.2L8 7.5l2.9-1.3L12 3Z" fill="currentColor"></path>
-        <path d="M7 12l.8 2.2L10 15l-2.2.8L7 18l-.8-2.2L4 15l2.2-.8L7 12Zm10-1 .9 2.6 2.6.9-2.6.9L17 18l-.9-2.6-2.6-.9 2.6-.9L17 11Z" fill="currentColor" opacity=".72"></path>
-      </svg>
+      <span class="platform-ai-bunny" aria-hidden="true">
+        <span class="platform-ai-bunny-ear platform-ai-bunny-ear-left"><span></span></span>
+        <span class="platform-ai-bunny-ear platform-ai-bunny-ear-right"><span></span></span>
+        <span class="platform-ai-bunny-face">
+          <span class="platform-ai-bunny-eye platform-ai-bunny-eye-left"></span>
+          <span class="platform-ai-bunny-eye platform-ai-bunny-eye-right"></span>
+          <span class="platform-ai-bunny-nose"></span>
+          <span class="platform-ai-bunny-mouth"></span>
+          <span class="platform-ai-bunny-cheek platform-ai-bunny-cheek-left"></span>
+          <span class="platform-ai-bunny-cheek platform-ai-bunny-cheek-right"></span>
+        </span>
+        <span class="platform-ai-bunny-paw"></span>
+      </span>
     </button>
     <div class="platform-ai-dialog" id="platformAiDialog" aria-hidden="true">
       <div class="platform-ai-head">
