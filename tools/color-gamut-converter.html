@@ -1,0 +1,1681 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>色域转换</title>
+    <link rel="stylesheet" href="../assets/platform-assistant.css?v=20260618-all-pages-v3" />
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --panel-alt: #f8fafc;
+        --ink: #182433;
+        --muted: #667085;
+        --line: #dce3ea;
+        --line-strong: #b8c2cc;
+        --blue: #206bc4;
+        --blue-dark: #1d60b3;
+        --green: #2fb344;
+        --red: #d63939;
+        --amber: #f59f00;
+        --track: #eef2f7;
+        --radius: 8px;
+        --shadow: 0 8px 24px rgba(24, 36, 51, 0.06);
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 14px 18px 20px;
+      }
+
+      .tool-nav {
+        display: flex;
+        margin-bottom: 8px;
+      }
+
+      .back-button {
+        min-height: 36px;
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--blue);
+        font-weight: 800;
+      }
+
+      .back-button:hover {
+        border-color: var(--blue);
+        background: #edf3fb;
+      }
+
+      .header,
+      .panel,
+      .chart-card,
+      .result-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 10px;
+        padding: 14px 16px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 4px;
+        color: var(--blue);
+        font-size: 23px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .header p,
+      .muted {
+        margin-bottom: 0;
+        color: var(--muted);
+      }
+
+      .preset-note {
+        min-width: 300px;
+        max-width: 440px;
+        padding: 9px 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #f8fbff;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.42;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .panel {
+        padding: 12px;
+      }
+
+      .main-grid > .panel {
+        height: 100%;
+      }
+
+      .control-grid,
+      .matrix-grid,
+      .input-table {
+        display: grid;
+        gap: 9px;
+      }
+
+      .input-table {
+        gap: 8px;
+      }
+
+      .primary-row {
+        display: grid;
+        grid-template-columns: 64px repeat(2, minmax(0, 1fr));
+        gap: 7px;
+        align-items: end;
+      }
+
+      .primary-row.header-row {
+        align-items: center;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .primary-label {
+        min-height: 34px;
+        display: flex;
+        align-items: center;
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+        min-height: 34px;
+        padding: 6px 9px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--ink);
+        outline: none;
+      }
+
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(32, 107, 196, 0.13);
+      }
+
+      .batch-input-box {
+        display: grid;
+        gap: 7px;
+        padding: 9px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-alt);
+      }
+
+      .batch-input-box textarea {
+        min-height: 82px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+
+      .batch-input-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .batch-input-status {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .batch-input-status.is-success {
+        color: var(--green);
+        font-weight: 800;
+      }
+
+      .batch-input-status.is-error {
+        color: var(--red);
+        font-weight: 800;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        min-height: 34px;
+        padding: 6px 11px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .btn:hover {
+        border-color: var(--line-strong);
+      }
+
+      .btn.primary {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #ffffff;
+      }
+
+      .btn.primary:hover {
+        background: var(--blue-dark);
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .result-card {
+        min-height: 76px;
+        padding: 9px 10px;
+        background: #fbfcfe;
+      }
+
+      .result-card span,
+      .result-card em {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 800;
+      }
+
+      .result-card strong {
+        display: block;
+        margin: 5px 0 2px;
+        color: var(--blue);
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 18px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+
+      .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .chart-card {
+        min-width: 0;
+        padding: 14px;
+      }
+
+      .chart-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .chart-head h2 {
+        margin-bottom: 2px;
+      }
+
+      .chart-canvas {
+        width: 100%;
+        min-height: 420px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #eaf3fb;
+      }
+
+      .legend {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .legend i {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        background: var(--swatch);
+      }
+
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+      }
+
+      table {
+        width: 100%;
+        min-width: 880px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        background: #f8fafc;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td strong {
+        color: var(--ink);
+      }
+
+      td code {
+        color: var(--blue-dark);
+        font-family: Consolas, "Courier New", monospace;
+        font-weight: 800;
+      }
+
+      .warning {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border: 1px solid rgba(214, 57, 57, 0.28);
+        border-radius: var(--radius);
+        background: #fff5f5;
+        color: var(--red);
+        font-weight: 800;
+      }
+
+      .subsection {
+        margin-top: 14px;
+      }
+
+      .converter-grid {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .rgb-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .matrix-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .matrix {
+        overflow: auto;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #f8fafc;
+      }
+
+      .matrix code {
+        white-space: pre;
+        color: #334155;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 1120px) {
+        .header,
+        .main-grid,
+        .chart-grid,
+        .converter-grid,
+        .matrix-grid,
+        .result-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header {
+          display: grid;
+        }
+
+        .preset-note {
+          min-width: 0;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .page {
+          padding: 12px;
+        }
+
+        .primary-row {
+          grid-template-columns: 1fr;
+        }
+
+        .primary-row.header-row {
+          display: none;
+        }
+
+        .rgb-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="tool-nav">
+        <button class="back-button" type="button" onclick="goBackToToolList()">&larr; 返回工具入口</button>
+      </div>
+
+      <section class="header">
+        <div>
+          <h1>色域转换</h1>
+          <p>输入 RGB 三原色的 x、y 色坐标，计算 CIE 1931 xy 与 CIE 1976 u'v' 马蹄图，并输出标准色域覆盖率和面积比。</p>
+        </div>
+        <div class="preset-note">
+          覆盖率 = 输入色域与标准色域的重叠面积 / 标准色域面积；面积比 = 输入色域面积 / 标准色域面积。计算方式按桌面“画质计算表格/色域计算.xlsx”和 ColorAC 覆盖面积示例实现。
+        </div>
+      </section>
+
+      <div class="main-grid">
+        <section class="panel">
+          <h2>RGB x,y 色坐标输入</h2>
+          <div class="control-grid">
+            <label class="field">
+              <span>快速填入</span>
+              <select id="gamutPreset"></select>
+            </label>
+
+            <div class="batch-input-box">
+              <label class="field">
+                <span>批量粘贴 RGB 的 xy 测量值</span>
+                <textarea id="rgbXyPaste" spellcheck="false" placeholder="支持直接粘贴 Excel 三行两列：&#10;0.683    0.284&#10;0.243    0.701&#10;0.158    0.032&#10;&#10;也支持：R 0.683 0.284 / G 0.243 0.701 / B 0.158 0.032"></textarea>
+              </label>
+              <div class="batch-input-actions">
+                <span class="batch-input-status" id="rgbXyPasteStatus">粘贴后会自动识别并填入。</span>
+                <button class="btn primary" type="button" id="applyRgbXyPasteBtn">解析并填入</button>
+              </div>
+            </div>
+
+            <div hidden aria-hidden="true">
+              <input id="redX" type="hidden" value="0.683" />
+              <input id="redY" type="hidden" value="0.284" />
+              <input id="greenX" type="hidden" value="0.243" />
+              <input id="greenY" type="hidden" value="0.701" />
+              <input id="blueX" type="hidden" value="0.158" />
+              <input id="blueY" type="hidden" value="0.032" />
+            </div>
+          </div>
+          <div class="warning" id="gamutWarning" hidden></div>
+        </section>
+
+        <section class="panel">
+          <h2>面积摘要</h2>
+          <div class="result-grid">
+            <div class="result-card">
+              <span>CIE 1931 面积</span>
+              <strong id="area1931">-</strong>
+              <em>xy 三角形面积</em>
+            </div>
+            <div class="result-card">
+              <span>CIE 1976 面积</span>
+              <strong id="area1976">-</strong>
+              <em>u'v' 三角形面积</em>
+            </div>
+            <div class="result-card">
+              <span>1931 可见区域占比</span>
+              <strong id="visible1931Ratio">-</strong>
+              <em>相对马蹄图面积</em>
+            </div>
+            <div class="result-card">
+              <span>1976 可见区域占比</span>
+              <strong id="visible1976Ratio">-</strong>
+              <em>相对马蹄图面积</em>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>标准色域</th>
+                  <th>CIE 1931 覆盖率</th>
+                  <th>CIE 1931 面积比</th>
+                  <th>CIE 1976 覆盖率</th>
+                  <th>CIE 1976 面积比</th>
+                  <th>标准面积 1931 / 1976</th>
+                </tr>
+              </thead>
+              <tbody id="coverageBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <section class="chart-grid subsection">
+        <div class="chart-card">
+          <div class="chart-head">
+            <div>
+              <h2>CIE 1931 xy 马蹄图</h2>
+              <p class="muted">光谱轨迹 + 紫线边界 + 输入/标准色域三角形</p>
+            </div>
+          </div>
+          <canvas class="chart-canvas" id="cie1931Canvas" height="420"></canvas>
+          <div class="legend" id="legend1931"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head">
+            <div>
+              <h2>CIE 1976 u'v' 马蹄图</h2>
+              <p class="muted">由 CIE 1931 x,y 转换为 u' = 4x / (-2x + 12y + 3)，v' = 9y / (-2x + 12y + 3)</p>
+            </div>
+          </div>
+          <canvas class="chart-canvas" id="cie1976Canvas" height="420"></canvas>
+          <div class="legend" id="legend1976"></div>
+        </div>
+      </section>
+
+      <section class="converter-grid subsection">
+        <section class="panel">
+          <h2>RGB / XYZ 矩阵转换</h2>
+          <div class="control-grid">
+            <label class="field">
+              <span>源色域</span>
+              <select id="sourceSpace"></select>
+            </label>
+            <label class="field">
+              <span>目标色域</span>
+              <select id="targetSpace"></select>
+            </label>
+            <label class="field">
+              <span>RGB 输入范围</span>
+              <select id="rangeMode">
+                <option value="255">0-255</option>
+                <option value="1">0-1</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>传递曲线</span>
+              <select id="transferMode">
+                <option value="srgb">sRGB / Rec.709 编码</option>
+                <option value="linear">线性 RGB</option>
+              </select>
+            </label>
+            <div class="rgb-grid">
+              <label class="field">
+                <span>R</span>
+                <input id="rgbR" type="number" value="255" step="0.001" />
+              </label>
+              <label class="field">
+                <span>G</span>
+                <input id="rgbG" type="number" value="80" step="0.001" />
+              </label>
+              <label class="field">
+                <span>B</span>
+                <input id="rgbB" type="number" value="40" step="0.001" />
+              </label>
+            </div>
+            <div class="button-row">
+              <button class="btn primary" type="button" id="convertBtn">转换</button>
+              <button class="btn" type="button" id="swapBtn">交换源/目标</button>
+              <button class="btn" type="button" id="resetBtn">重置</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>转换结果</h2>
+          <div class="result-grid">
+            <div class="result-card">
+              <span>目标 RGB</span>
+              <strong id="targetRgb">-</strong>
+              <em id="targetRgbHint">转换后编码值</em>
+            </div>
+            <div class="result-card">
+              <span>XYZ</span>
+              <strong id="xyzValue">-</strong>
+              <em>D65 相对白点</em>
+            </div>
+            <div class="result-card">
+              <span>xy</span>
+              <strong id="xyValue">-</strong>
+              <em>色品坐标</em>
+            </div>
+            <div class="result-card">
+              <span>源色域面积</span>
+              <strong id="sourceSpaceArea">-</strong>
+              <em>CIE 1931 xy</em>
+            </div>
+          </div>
+          <div class="matrix-grid">
+            <div class="matrix">
+              <h3>源 RGB → XYZ</h3>
+              <code id="sourceMatrix">-</code>
+            </div>
+            <div class="matrix">
+              <h3>XYZ → 目标 RGB</h3>
+              <code id="targetMatrix">-</code>
+            </div>
+          </div>
+          <div class="warning" id="clipWarning" hidden>转换结果超出目标色域，显示值已裁切到目标 RGB 范围。</div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      function goBackToToolList() {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        window.location.href = "../index.html#debug-converter";
+      }
+
+      const STANDARD_SPACES = {
+        srgb: {
+          name: "sRGB / BT.709",
+          shortName: "sRGB",
+          color: "#206bc4",
+          red: [0.64, 0.33],
+          green: [0.30, 0.60],
+          blue: [0.15, 0.06],
+          white: [0.3127, 0.3290]
+        },
+        adobe: {
+          name: "Adobe RGB",
+          shortName: "Adobe",
+          color: "#2fb344",
+          red: [0.64, 0.33],
+          green: [0.21, 0.71],
+          blue: [0.15, 0.06],
+          white: [0.3127, 0.3290]
+        },
+        ntsc1953: {
+          name: "NTSC 1953",
+          shortName: "NTSC",
+          color: "#f59f00",
+          red: [0.67, 0.33],
+          green: [0.21, 0.71],
+          blue: [0.14, 0.08],
+          white: [0.3127, 0.3290]
+        },
+        bt2020: {
+          name: "BT.2020",
+          shortName: "BT2020",
+          color: "#6b5dd3",
+          red: [0.708, 0.292],
+          green: [0.170, 0.797],
+          blue: [0.131, 0.046],
+          white: [0.3127, 0.3290]
+        },
+        dciP3: {
+          name: "DCI-P3",
+          shortName: "DCI-P3",
+          color: "#d6336c",
+          red: [0.68, 0.32],
+          green: [0.265, 0.69],
+          blue: [0.15, 0.06],
+          white: [0.3127, 0.3290]
+        }
+      };
+
+      const GAMUT_PRESETS = {
+        excelSample: {
+          name: "画质计算表格示例",
+          red: [0.683, 0.284],
+          green: [0.243, 0.701],
+          blue: [0.158, 0.032]
+        },
+        measuredDac: {
+          name: "ColorAC 实测示例",
+          red: [0.696847, 0.303565],
+          green: [0.133283, 0.767594],
+          blue: [0.145393, 0.030989]
+        },
+        srgb: STANDARD_SPACES.srgb,
+        adobe: STANDARD_SPACES.adobe,
+        ntsc1953: STANDARD_SPACES.ntsc1953,
+        bt2020: STANDARD_SPACES.bt2020,
+        dciP3: STANDARD_SPACES.dciP3
+      };
+
+      const SPECTRAL_LOCUS_XY = [
+        [380, 0.174112, 0.004964],
+        [385, 0.174008, 0.004981],
+        [390, 0.173801, 0.004915],
+        [395, 0.173560, 0.004923],
+        [400, 0.173337, 0.004797],
+        [405, 0.173021, 0.004775],
+        [410, 0.172577, 0.004799],
+        [415, 0.172087, 0.004833],
+        [420, 0.171407, 0.005102],
+        [425, 0.170301, 0.005789],
+        [430, 0.168878, 0.006900],
+        [435, 0.166895, 0.008556],
+        [440, 0.164412, 0.010858],
+        [445, 0.161105, 0.013793],
+        [450, 0.156641, 0.017705],
+        [455, 0.150985, 0.022740],
+        [460, 0.143960, 0.029703],
+        [465, 0.135503, 0.039879],
+        [470, 0.124118, 0.057803],
+        [475, 0.109594, 0.086843],
+        [480, 0.091294, 0.132702],
+        [485, 0.068706, 0.200723],
+        [490, 0.045391, 0.294976],
+        [495, 0.023460, 0.412703],
+        [500, 0.008168, 0.538423],
+        [505, 0.003859, 0.654823],
+        [510, 0.013870, 0.750186],
+        [515, 0.038852, 0.812016],
+        [520, 0.074302, 0.833803],
+        [525, 0.114161, 0.826207],
+        [530, 0.154722, 0.805864],
+        [535, 0.192876, 0.781629],
+        [540, 0.229620, 0.754329],
+        [545, 0.265775, 0.724324],
+        [550, 0.301604, 0.692308],
+        [555, 0.337363, 0.658848],
+        [560, 0.373102, 0.624451],
+        [565, 0.408736, 0.589607],
+        [570, 0.444062, 0.554714],
+        [575, 0.478775, 0.520202],
+        [580, 0.512486, 0.486591],
+        [585, 0.544787, 0.454434],
+        [590, 0.575151, 0.424232],
+        [595, 0.602933, 0.396497],
+        [600, 0.627037, 0.372491],
+        [605, 0.648233, 0.351395],
+        [610, 0.665764, 0.334011],
+        [615, 0.680079, 0.319747],
+        [620, 0.691504, 0.308342],
+        [625, 0.700606, 0.299301],
+        [630, 0.707918, 0.292027],
+        [635, 0.714032, 0.285929],
+        [640, 0.719033, 0.280935],
+        [645, 0.723032, 0.276948],
+        [650, 0.725992, 0.274008],
+        [655, 0.728272, 0.271728],
+        [660, 0.729969, 0.270031],
+        [665, 0.731089, 0.268911],
+        [670, 0.731993, 0.268007],
+        [675, 0.732719, 0.267281],
+        [680, 0.733417, 0.266583],
+        [685, 0.734047, 0.265953],
+        [690, 0.734390, 0.265610],
+        [695, 0.734592, 0.265408],
+        [700, 0.734690, 0.265310],
+        [705, 0.734690, 0.265310],
+        [710, 0.734690, 0.265310],
+        [715, 0.734690, 0.265310],
+        [720, 0.734690, 0.265310],
+        [725, 0.734690, 0.265310],
+        [730, 0.734690, 0.265310],
+        [735, 0.734690, 0.265310],
+        [740, 0.734690, 0.265310],
+        [745, 0.734690, 0.265310],
+        [750, 0.734690, 0.265310],
+        [755, 0.734690, 0.265310],
+        [760, 0.734690, 0.265310],
+        [765, 0.734690, 0.265310],
+        [770, 0.734690, 0.265310],
+        [775, 0.734690, 0.265310],
+        [780, 0.734690, 0.265310]
+      ];
+
+      const gamutIds = [
+        "gamutPreset",
+        "rgbXyPaste",
+        "rgbXyPasteStatus",
+        "redX",
+        "redY",
+        "greenX",
+        "greenY",
+        "blueX",
+        "blueY",
+        "area1931",
+        "area1976",
+        "visible1931Ratio",
+        "visible1976Ratio",
+        "coverageBody",
+        "gamutWarning",
+        "cie1931Canvas",
+        "cie1976Canvas",
+        "legend1931",
+        "legend1976"
+      ];
+
+      const converterIds = [
+        "sourceSpace",
+        "targetSpace",
+        "rangeMode",
+        "transferMode",
+        "rgbR",
+        "rgbG",
+        "rgbB",
+        "targetRgb",
+        "targetRgbHint",
+        "xyzValue",
+        "xyValue",
+        "sourceSpaceArea",
+        "sourceMatrix",
+        "targetMatrix",
+        "clipWarning"
+      ];
+
+      const els = Object.fromEntries(gamutIds.concat(converterIds).map((id) => [id, document.getElementById(id)]));
+      const visible1931Area = polygonArea(SPECTRAL_LOCUS_XY.map((point) => [point[1], point[2]]));
+      const visible1976Area = polygonArea(SPECTRAL_LOCUS_XY.map((point) => xyToUvPrime([point[1], point[2]])));
+
+      init();
+
+      function init() {
+        Object.entries(GAMUT_PRESETS).forEach(([key, space]) => {
+          els.gamutPreset.add(new Option(space.name, key));
+        });
+        els.gamutPreset.value = "excelSample";
+
+        Object.entries(STANDARD_SPACES).forEach(([key, space]) => {
+          els.sourceSpace.add(new Option(space.name, key));
+          els.targetSpace.add(new Option(space.name, key));
+        });
+        els.sourceSpace.value = "bt2020";
+        els.targetSpace.value = "srgb";
+
+        document.getElementById("applyRgbXyPasteBtn").addEventListener("click", applyBatchRgbXy);
+        els.rgbXyPaste.addEventListener("paste", () => {
+          window.setTimeout(applyBatchRgbXy, 0);
+        });
+        els.gamutPreset.addEventListener("input", () => applyGamutPreset(els.gamutPreset.value));
+        ["redX", "redY", "greenX", "greenY", "blueX", "blueY"].forEach((id) => {
+          els[id].addEventListener("input", updateGamut);
+        });
+
+        document.getElementById("convertBtn").addEventListener("click", convert);
+        document.getElementById("swapBtn").addEventListener("click", swapSpaces);
+        document.getElementById("resetBtn").addEventListener("click", resetInputs);
+        ["sourceSpace", "targetSpace", "rangeMode", "transferMode", "rgbR", "rgbG", "rgbB"].forEach((id) => {
+          els[id].addEventListener("input", convert);
+        });
+
+        renderLegends();
+        updateGamut();
+        convert();
+        window.addEventListener("resize", debounce(() => {
+          updateGamut();
+        }, 100));
+      }
+
+      function applyGamutPreset(key) {
+        const preset = GAMUT_PRESETS[key] || GAMUT_PRESETS.excelSample;
+        els.gamutPreset.value = key;
+        els.redX.value = preset.red[0];
+        els.redY.value = preset.red[1];
+        els.greenX.value = preset.green[0];
+        els.greenY.value = preset.green[1];
+        els.blueX.value = preset.blue[0];
+        els.blueY.value = preset.blue[1];
+        updateGamut();
+      }
+
+      function applyBatchRgbXy() {
+        const parsed = parseBatchRgbXy(els.rgbXyPaste.value);
+        if (!parsed.ok) {
+          setBatchInputStatus(parsed.message, "error");
+          return;
+        }
+
+        const [red, green, blue] = parsed.points;
+        els.redX.value = red[0];
+        els.redY.value = red[1];
+        els.greenX.value = green[0];
+        els.greenY.value = green[1];
+        els.blueX.value = blue[0];
+        els.blueY.value = blue[1];
+        updateGamut();
+        setBatchInputStatus("已按 Red、Green、Blue 顺序填入并完成计算。", "success");
+      }
+
+      function parseBatchRgbXy(text) {
+        const content = String(text || "").trim();
+        if (!content) {
+          return { ok: false, message: "请先粘贴 RGB 的 xy 测量值。" };
+        }
+
+        const lines = content.split(/\r?\n|\s*\/\s*/).map((line) => line.trim()).filter(Boolean);
+        const labeled = { red: null, green: null, blue: null };
+        lines.forEach((line) => {
+          const values = extractNumbers(line);
+          if (values.length < 2) {
+            return;
+          }
+          if (/^(r|red|红)(?:\b|色|[:：\s])/i.test(line)) {
+            labeled.red = values.slice(-2);
+          } else if (/^(g|green|绿)(?:\b|色|[:：\s])/i.test(line)) {
+            labeled.green = values.slice(-2);
+          } else if (/^(b|blue|蓝)(?:\b|色|[:：\s])/i.test(line)) {
+            labeled.blue = values.slice(-2);
+          }
+        });
+
+        let points;
+        if (labeled.red && labeled.green && labeled.blue) {
+          points = [labeled.red, labeled.green, labeled.blue];
+        } else {
+          const rowPairs = lines.map(extractNumbers).filter((values) => values.length === 2);
+          if (rowPairs.length >= 3) {
+            points = rowPairs.slice(0, 3);
+          } else {
+            const values = extractNumbers(content);
+            if (values.length !== 6) {
+              return { ok: false, message: `需要识别 6 个数值，当前识别到 ${values.length} 个。请按 R、G、B 顺序粘贴三组 x、y。` };
+            }
+            points = [values.slice(0, 2), values.slice(2, 4), values.slice(4, 6)];
+          }
+        }
+
+        const labels = ["Red", "Green", "Blue"];
+        for (let index = 0; index < points.length; index += 1) {
+          const [x, y] = points[index];
+          if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x + y > 1) {
+            return { ok: false, message: `${labels[index]} 的 xy 数值无效，需满足 x >= 0、y >= 0、x + y <= 1。` };
+          }
+        }
+        return { ok: true, points };
+      }
+
+      function extractNumbers(text) {
+        return (String(text || "").match(/-?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/gi) || []).map(Number);
+      }
+
+      function setBatchInputStatus(message, type) {
+        els.rgbXyPasteStatus.textContent = message;
+        els.rgbXyPasteStatus.classList.toggle("is-success", type === "success");
+        els.rgbXyPasteStatus.classList.toggle("is-error", type === "error");
+      }
+
+      function updateGamut() {
+        const input = readGamutInput();
+        if (!input.ok) {
+          els.gamutWarning.hidden = false;
+          els.gamutWarning.textContent = input.message;
+          clearGamutOutput();
+          return;
+        }
+        els.gamutWarning.hidden = true;
+
+        const test1931 = input.points;
+        const test1976 = test1931.map(xyToUvPrime);
+        const testArea1931 = polygonArea(test1931);
+        const testArea1976 = polygonArea(test1976);
+
+        els.area1931.textContent = formatNumber(testArea1931, 6);
+        els.area1976.textContent = formatNumber(testArea1976, 6);
+        els.visible1931Ratio.textContent = formatPercent(testArea1931 / visible1931Area, 2);
+        els.visible1976Ratio.textContent = formatPercent(testArea1976 / visible1976Area, 2);
+
+        const rows = Object.values(STANDARD_SPACES).map((space) => {
+          const reference1931 = getSpacePolygon(space);
+          const reference1976 = reference1931.map(xyToUvPrime);
+          const referenceArea1931 = polygonArea(reference1931);
+          const referenceArea1976 = polygonArea(reference1976);
+          const overlap1931 = polygonArea(intersectConvexPolygons(test1931, reference1931));
+          const overlap1976 = polygonArea(intersectConvexPolygons(test1976, reference1976));
+          return {
+            space,
+            referenceArea1931,
+            referenceArea1976,
+            coverage1931: safeRatio(overlap1931, referenceArea1931),
+            areaRatio1931: safeRatio(testArea1931, referenceArea1931),
+            coverage1976: safeRatio(overlap1976, referenceArea1976),
+            areaRatio1976: safeRatio(testArea1976, referenceArea1976)
+          };
+        });
+
+        els.coverageBody.innerHTML = rows.map(renderCoverageRow).join("");
+        drawChromaticityDiagram(els.cie1931Canvas, "xy", test1931);
+        drawChromaticityDiagram(els.cie1976Canvas, "uv", test1976);
+      }
+
+      function readGamutInput() {
+        const points = [
+          [Number(els.redX.value), Number(els.redY.value)],
+          [Number(els.greenX.value), Number(els.greenY.value)],
+          [Number(els.blueX.value), Number(els.blueY.value)]
+        ];
+        const labels = ["Red", "Green", "Blue"];
+        for (let index = 0; index < points.length; index += 1) {
+          const [x, y] = points[index];
+          if (!Number.isFinite(x) || !Number.isFinite(y)) {
+            return { ok: false, message: `${labels[index]} 的 x、y 必须是有效数字。` };
+          }
+          if (x < 0 || y < 0 || x + y > 1) {
+            return { ok: false, message: `${labels[index]} 坐标超出 CIE 1931 xy 有效范围，需满足 x >= 0、y >= 0、x + y <= 1。` };
+          }
+        }
+        if (polygonArea(points) <= 0.0000001) {
+          return { ok: false, message: "RGB 三点形成的三角形面积过小，无法计算覆盖率。" };
+        }
+        return { ok: true, points };
+      }
+
+      function clearGamutOutput() {
+        ["area1931", "area1976", "visible1931Ratio", "visible1976Ratio"].forEach((id) => {
+          els[id].textContent = "-";
+        });
+        els.coverageBody.innerHTML = "";
+        clearCanvas(els.cie1931Canvas);
+        clearCanvas(els.cie1976Canvas);
+      }
+
+      function renderCoverageRow(row) {
+        return `
+          <tr>
+            <td><strong style="color:${row.space.color}">${row.space.shortName}</strong></td>
+            <td><code>${formatPercent(row.coverage1931, 2)}</code></td>
+            <td><code>${formatPercent(row.areaRatio1931, 2)}</code></td>
+            <td><code>${formatPercent(row.coverage1976, 2)}</code></td>
+            <td><code>${formatPercent(row.areaRatio1976, 2)}</code></td>
+            <td>${formatNumber(row.referenceArea1931, 6)} / ${formatNumber(row.referenceArea1976, 6)}</td>
+          </tr>
+        `;
+      }
+
+      function renderLegends() {
+        const html = [
+          { name: "输入色域", color: "#ff00d6" },
+          ...Object.values(STANDARD_SPACES).map((space) => ({ name: space.shortName, color: space.color }))
+        ]
+          .map((item) => `<span><i style="--swatch:${item.color}"></i>${item.name}</span>`)
+          .join("");
+        els.legend1931.innerHTML = html;
+        els.legend1976.innerHTML = html;
+      }
+
+      function drawChromaticityDiagram(canvas, mode, testPolygon) {
+        const ctx = canvas.getContext("2d");
+        const ratio = window.devicePixelRatio || 1;
+        const width = canvas.clientWidth || 640;
+        const height = 460;
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#eaf3fb";
+        ctx.fillRect(0, 0, width, height);
+
+        const bounds = mode === "xy"
+          ? { minX: 0, maxX: 0.78, minY: 0, maxY: 0.86, xLabel: "x", yLabel: "y", name: "CIE1931" }
+          : { minX: 0, maxX: 0.65, minY: 0, maxY: 0.58, xLabel: "u'", yLabel: "v'", name: "CIE1976 UCS" };
+        const plot = {
+          left: 48,
+          top: 18,
+          right: 18,
+          bottom: 52,
+          width: width - 66,
+          height: height - 70
+        };
+        const toScreen = (point) => {
+          const x = plot.left + ((point[0] - bounds.minX) / (bounds.maxX - bounds.minX)) * plot.width;
+          const y = plot.top + (1 - (point[1] - bounds.minY) / (bounds.maxY - bounds.minY)) * plot.height;
+          return [x, y];
+        };
+
+        const locus = SPECTRAL_LOCUS_XY.map((point) => mode === "xy" ? [point[1], point[2]] : xyToUvPrime([point[1], point[2]]));
+        drawChromaticityFill(ctx, plot, bounds, mode, locus);
+        drawGrid(ctx, plot, bounds, toScreen);
+        drawPolygon(ctx, locus, toScreen, {
+          stroke: "#050505",
+          fill: "transparent",
+          lineWidth: 2.2,
+          close: true
+        });
+        drawWavelengthLabels(ctx, mode, toScreen);
+
+        Object.values(STANDARD_SPACES).forEach((space) => {
+          const polygon = getSpacePolygon(space).map((point) => mode === "xy" ? point : xyToUvPrime(point));
+          drawStandardPolygon(ctx, polygon, toScreen, space);
+        });
+
+        drawPolygon(ctx, testPolygon, toScreen, {
+          stroke: "#ff00d6",
+          fill: "rgba(255, 0, 214, 0.06)",
+          lineWidth: 3,
+          close: true
+        });
+        drawPrimaryPoints(ctx, testPolygon, toScreen, ["R", "G", "B"], "#ff00d6", "square");
+      }
+
+      function drawGrid(ctx, plot, bounds, toScreen) {
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
+        ctx.font = "12px Segoe UI, Microsoft YaHei, Arial";
+
+        for (let x = 0; x <= bounds.maxX + 0.001; x += 0.05) {
+          const [sx] = toScreen([x, bounds.minY]);
+          const isMajor = Math.abs(Math.round(x * 10) - x * 10) < 0.001;
+          ctx.beginPath();
+          ctx.moveTo(sx, plot.top);
+          ctx.lineTo(sx, plot.top + plot.height);
+          ctx.strokeStyle = isMajor ? "rgba(0, 0, 0, 0.74)" : "rgba(0, 0, 0, 0.25)";
+          ctx.lineWidth = isMajor ? 1.6 : 0.8;
+          if (!isMajor && ctx.setLineDash) {
+            ctx.setLineDash([4, 3]);
+          }
+          ctx.stroke();
+          if (ctx.setLineDash) {
+            ctx.setLineDash([]);
+          }
+          if (isMajor) {
+            ctx.fillStyle = "#050505";
+            ctx.fillText(formatNumber(x, 1), sx - 8, plot.top + plot.height + 18);
+          }
+        }
+
+        for (let y = 0; y <= bounds.maxY + 0.001; y += 0.05) {
+          const [, sy] = toScreen([bounds.minX, y]);
+          const isMajor = Math.abs(Math.round(y * 10) - y * 10) < 0.001;
+          ctx.beginPath();
+          ctx.moveTo(plot.left, sy);
+          ctx.lineTo(plot.left + plot.width, sy);
+          ctx.strokeStyle = isMajor ? "rgba(0, 0, 0, 0.74)" : "rgba(0, 0, 0, 0.25)";
+          ctx.lineWidth = isMajor ? 1.6 : 0.8;
+          if (!isMajor && ctx.setLineDash) {
+            ctx.setLineDash([4, 3]);
+          }
+          ctx.stroke();
+          if (ctx.setLineDash) {
+            ctx.setLineDash([]);
+          }
+          if (isMajor) {
+            ctx.fillStyle = "#050505";
+            ctx.fillText(formatNumber(y, 1), 12, sy + 4);
+          }
+        }
+        ctx.strokeStyle = "#050505";
+        ctx.lineWidth = 2.4;
+        ctx.strokeRect(plot.left, plot.top, plot.width, plot.height);
+        ctx.fillStyle = "#050505";
+        ctx.font = "700 30px Segoe UI, Microsoft YaHei, Arial";
+        ctx.fillText(bounds.xLabel, plot.left + plot.width / 2 - 12, plot.top + plot.height + 44);
+        ctx.fillText(bounds.yLabel, 18, plot.top + plot.height / 2 + 8);
+        ctx.font = "13px Segoe UI, Microsoft YaHei, Arial";
+        ctx.fillText(bounds.name, plot.left + plot.width - 88, plot.top + plot.height + 44);
+        ctx.restore();
+      }
+
+      function drawChromaticityFill(ctx, plot, bounds, mode, locus) {
+        const step = 2;
+        ctx.save();
+        for (let py = plot.top; py <= plot.top + plot.height; py += step) {
+          for (let px = plot.left; px <= plot.left + plot.width; px += step) {
+            const point = [
+              bounds.minX + ((px - plot.left) / plot.width) * (bounds.maxX - bounds.minX),
+              bounds.maxY - ((py - plot.top) / plot.height) * (bounds.maxY - bounds.minY)
+            ];
+            if (!pointInPolygon(point, locus)) {
+              continue;
+            }
+            const xy = mode === "xy" ? point : uvPrimeToXy(point);
+            const color = xyToDisplayRgb(xy);
+            if (!color) {
+              continue;
+            }
+            ctx.fillStyle = color;
+            ctx.fillRect(px, py, step + 0.6, step + 0.6);
+          }
+        }
+        ctx.restore();
+      }
+
+      function drawWavelengthLabels(ctx, mode, toScreen) {
+        const labels = mode === "xy"
+          ? [460, 470, 480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 650, 700]
+          : [440, 450, 460, 470, 480, 490, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600, 610, 620, 630, 640, 660];
+        const offsets = {
+          440: [-18, 16],
+          450: [-18, 14],
+          460: [-18, 10],
+          470: [-20, 0],
+          480: [-20, -2],
+          490: [-24, -6],
+          500: [-24, -4],
+          510: [-22, -2],
+          520: [-14, -8],
+          530: [6, -10],
+          540: [8, -6],
+          550: [8, -4],
+          560: [8, -2],
+          570: [8, -1],
+          580: [8, 0],
+          590: [8, 0],
+          600: [8, 0],
+          610: [8, 0],
+          620: [8, 0],
+          630: [8, 2],
+          640: [8, 2],
+          650: [8, 4],
+          660: [8, 2],
+          700: [8, 2]
+        };
+        ctx.save();
+        ctx.fillStyle = "#050505";
+        ctx.font = "13px Segoe UI, Microsoft YaHei, Arial";
+        labels.forEach((wavelength) => {
+          const source = SPECTRAL_LOCUS_XY.find((point) => point[0] === wavelength);
+          if (!source) {
+            return;
+          }
+          const point = mode === "xy" ? [source[1], source[2]] : xyToUvPrime([source[1], source[2]]);
+          const [x, y] = toScreen(point);
+          const [dx, dy] = offsets[wavelength] || [8, -2];
+          ctx.fillText(String(wavelength), x + dx, y + dy);
+        });
+        ctx.restore();
+      }
+
+      function drawStandardPolygon(ctx, polygon, toScreen, space) {
+        drawPolygon(ctx, polygon, toScreen, {
+          stroke: space.color,
+          fill: "transparent",
+          lineWidth: space.shortName === "BT2020" ? 2.6 : 2.1,
+          close: true
+        });
+        drawPrimaryPoints(ctx, polygon, toScreen, ["", "", ""], space.color, "triangle");
+        drawSpaceName(ctx, polygon, toScreen, space);
+      }
+
+      function drawPolygon(ctx, polygon, toScreen, options) {
+        if (!polygon.length) {
+          return;
+        }
+        ctx.save();
+        ctx.beginPath();
+        polygon.forEach((point, index) => {
+          const [x, y] = toScreen(point);
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        if (options.close) {
+          ctx.closePath();
+        }
+        if (options.fill && options.fill !== "transparent") {
+          ctx.fillStyle = options.fill;
+          ctx.fill();
+        }
+        ctx.strokeStyle = options.stroke;
+        ctx.lineWidth = options.lineWidth;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawPrimaryPoints(ctx, polygon, toScreen, labels, color = "#111827", marker = "circle") {
+        ctx.save();
+        ctx.font = "800 12px Segoe UI, Microsoft YaHei, Arial";
+        polygon.forEach((point, index) => {
+          const [x, y] = toScreen(point);
+          ctx.fillStyle = "#ffffff";
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          if (marker === "square") {
+            ctx.rect(x - 6, y - 6, 12, 12);
+          } else if (marker === "triangle") {
+            ctx.moveTo(x, y + 6);
+            ctx.lineTo(x - 6, y - 5);
+            ctx.lineTo(x + 6, y - 5);
+            ctx.closePath();
+          } else {
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+          }
+          ctx.fill();
+          ctx.stroke();
+          if (labels[index]) {
+            ctx.fillStyle = color;
+            ctx.fillText(labels[index], x + 8, y - 7);
+          }
+        });
+        ctx.restore();
+      }
+
+      function drawSpaceName(ctx, polygon, toScreen, space) {
+        const center = polygon.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]], [0, 0]).map((value) => value / polygon.length);
+        const [x, y] = toScreen(center);
+        const offsets = {
+          "sRGB": [8, 18],
+          "Adobe": [-48, -10],
+          "NTSC": [-44, 20],
+          "BT2020": [8, -22],
+          "DCI-P3": [8, 0]
+        };
+        const [dx, dy] = offsets[space.shortName] || [8, 0];
+        const label = space.shortName;
+        const labelWidth = label.length * 7 + 8;
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
+        ctx.fillRect(x + dx - 4, y + dy - 12, labelWidth, 16);
+        ctx.fillStyle = space.color;
+        ctx.font = "800 11px Segoe UI, Microsoft YaHei, Arial";
+        ctx.fillText(label, x + dx, y + dy);
+        ctx.restore();
+      }
+
+      function clearCanvas(canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function getSpacePolygon(space) {
+        return [space.red, space.green, space.blue];
+      }
+
+      function xyToUvPrime(point) {
+        const [x, y] = point;
+        const denom = 3 - 2 * x + 12 * y;
+        return [4 * x / denom, 9 * y / denom];
+      }
+
+      function uvPrimeToXy(point) {
+        const [u, v] = point;
+        const denom = 6 * u - 16 * v + 12;
+        if (Math.abs(denom) < 1e-12) {
+          return [0, 0];
+        }
+        return [9 * u / denom, 4 * v / denom];
+      }
+
+      function xyToDisplayRgb(point) {
+        const [x, y] = point;
+        if (!Number.isFinite(x) || !Number.isFinite(y) || y <= 0) {
+          return null;
+        }
+        const X = x / y;
+        const Y = 1;
+        const Z = (1 - x - y) / y;
+        let r = 3.2406 * X - 1.5372 * Y - 0.4986 * Z;
+        let g = -0.9689 * X + 1.8758 * Y + 0.0415 * Z;
+        let b = 0.0557 * X - 0.2040 * Y + 1.0570 * Z;
+        r = Math.max(0, r);
+        g = Math.max(0, g);
+        b = Math.max(0, b);
+        const maxValue = Math.max(r, g, b);
+        if (maxValue <= 0) {
+          return null;
+        }
+        const red = Math.round(encodeSrgb(clamp(r / maxValue, 0, 1)) * 255);
+        const green = Math.round(encodeSrgb(clamp(g / maxValue, 0, 1)) * 255);
+        const blue = Math.round(encodeSrgb(clamp(b / maxValue, 0, 1)) * 255);
+        return `rgb(${red}, ${green}, ${blue})`;
+      }
+
+      function pointInPolygon(point, polygon) {
+        let inside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+          const xi = polygon[i][0];
+          const yi = polygon[i][1];
+          const xj = polygon[j][0];
+          const yj = polygon[j][1];
+          const intersects = ((yi > point[1]) !== (yj > point[1])) &&
+            (point[0] < ((xj - xi) * (point[1] - yi)) / (yj - yi || 1e-12) + xi);
+          if (intersects) {
+            inside = !inside;
+          }
+        }
+        return inside;
+      }
+
+      function polygonArea(points) {
+        if (!points || points.length < 3) {
+          return 0;
+        }
+        return Math.abs(signedPolygonArea(points));
+      }
+
+      function signedPolygonArea(points) {
+        let sum = 0;
+        for (let index = 0; index < points.length; index += 1) {
+          const current = points[index];
+          const next = points[(index + 1) % points.length];
+          sum += current[0] * next[1] - next[0] * current[1];
+        }
+        return sum / 2;
+      }
+
+      function ensureCounterClockwise(points) {
+        return signedPolygonArea(points) < 0 ? [...points].reverse() : [...points];
+      }
+
+      function intersectConvexPolygons(subjectPolygon, clipPolygon) {
+        let output = ensureCounterClockwise(subjectPolygon);
+        const clip = ensureCounterClockwise(clipPolygon);
+        for (let index = 0; index < clip.length; index += 1) {
+          const a = clip[index];
+          const b = clip[(index + 1) % clip.length];
+          const input = output;
+          output = [];
+          if (!input.length) {
+            break;
+          }
+          let previous = input[input.length - 1];
+          input.forEach((current) => {
+            const currentInside = isInside(current, a, b);
+            const previousInside = isInside(previous, a, b);
+            if (currentInside) {
+              if (!previousInside) {
+                output.push(lineIntersection(previous, current, a, b));
+              }
+              output.push(current);
+            } else if (previousInside) {
+              output.push(lineIntersection(previous, current, a, b));
+            }
+            previous = current;
+          });
+        }
+        return output;
+      }
+
+      function isInside(point, edgeStart, edgeEnd) {
+        return cross(edgeStart, edgeEnd, point) >= -1e-10;
+      }
+
+      function cross(a, b, c) {
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+      }
+
+      function lineIntersection(p1, p2, p3, p4) {
+        const x1 = p1[0];
+        const y1 = p1[1];
+        const x2 = p2[0];
+        const y2 = p2[1];
+        const x3 = p3[0];
+        const y3 = p3[1];
+        const x4 = p4[0];
+        const y4 = p4[1];
+        const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        if (Math.abs(denom) < 1e-12) {
+          return p2;
+        }
+        const px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+        const py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+        return [px, py];
+      }
+
+      function convert() {
+        const range = els.rangeMode.value === "255" ? 255 : 1;
+        const input = [Number(els.rgbR.value), Number(els.rgbG.value), Number(els.rgbB.value)].map((value) => clamp(value / range, 0, 1));
+        const linearInput = els.transferMode.value === "srgb" ? input.map(decodeSrgb) : input;
+        const sourceMatrix = rgbToXyzMatrix(STANDARD_SPACES[els.sourceSpace.value]);
+        const targetMatrix = invert3(rgbToXyzMatrix(STANDARD_SPACES[els.targetSpace.value]));
+        const xyz = multiplyMatrixVector(sourceMatrix, linearInput);
+        const targetLinear = multiplyMatrixVector(targetMatrix, xyz);
+        const clipped = targetLinear.some((value) => value < -0.00001 || value > 1.00001);
+        const targetDisplay = targetLinear.map((value) => clamp(value, 0, 1));
+        const encoded = els.transferMode.value === "srgb" ? targetDisplay.map(encodeSrgb) : targetDisplay;
+        const outputRange = els.rangeMode.value === "255" ? 255 : 1;
+        const output = encoded.map((value) => value * outputRange);
+        const xy = xyzToXy(xyz);
+        const sourceArea = polygonArea(getSpacePolygon(STANDARD_SPACES[els.sourceSpace.value]));
+
+        els.targetRgb.textContent = output.map((value) => formatNumber(value, outputRange === 255 ? 0 : 4)).join(", ");
+        els.targetRgbHint.textContent = clipped ? "已裁切到目标范围" : "转换后编码值";
+        els.xyzValue.textContent = xyz.map((value) => formatNumber(value, 4)).join(", ");
+        els.xyValue.textContent = `${formatNumber(xy[0], 4)}, ${formatNumber(xy[1], 4)}`;
+        els.sourceSpaceArea.textContent = formatNumber(sourceArea, 6);
+        els.sourceMatrix.textContent = formatMatrix(sourceMatrix);
+        els.targetMatrix.textContent = formatMatrix(targetMatrix);
+        els.clipWarning.hidden = !clipped;
+      }
+
+      function swapSpaces() {
+        const current = els.sourceSpace.value;
+        els.sourceSpace.value = els.targetSpace.value;
+        els.targetSpace.value = current;
+        convert();
+      }
+
+      function resetInputs() {
+        els.sourceSpace.value = "bt2020";
+        els.targetSpace.value = "srgb";
+        els.rangeMode.value = "255";
+        els.transferMode.value = "srgb";
+        els.rgbR.value = "255";
+        els.rgbG.value = "80";
+        els.rgbB.value = "40";
+        convert();
+      }
+
+      function rgbToXyzMatrix(space) {
+        const r = xyToXyz(space.red);
+        const g = xyToXyz(space.green);
+        const b = xyToXyz(space.blue);
+        const w = xyToXyz(space.white);
+        const primaryMatrix = [
+          [r[0], g[0], b[0]],
+          [r[1], g[1], b[1]],
+          [r[2], g[2], b[2]]
+        ];
+        const scale = multiplyMatrixVector(invert3(primaryMatrix), w);
+        return [
+          [primaryMatrix[0][0] * scale[0], primaryMatrix[0][1] * scale[1], primaryMatrix[0][2] * scale[2]],
+          [primaryMatrix[1][0] * scale[0], primaryMatrix[1][1] * scale[1], primaryMatrix[1][2] * scale[2]],
+          [primaryMatrix[2][0] * scale[0], primaryMatrix[2][1] * scale[1], primaryMatrix[2][2] * scale[2]]
+        ];
+      }
+
+      function xyToXyz(point) {
+        const [x, y] = point;
+        return [x / y, 1, (1 - x - y) / y];
+      }
+
+      function xyzToXy(xyz) {
+        const sum = xyz[0] + xyz[1] + xyz[2];
+        return sum ? [xyz[0] / sum, xyz[1] / sum] : [0, 0];
+      }
+
+      function multiplyMatrixVector(matrix, vector) {
+        return matrix.map((row) => row.reduce((sum, value, index) => sum + value * vector[index], 0));
+      }
+
+      function invert3(matrix) {
+        const [[a, b, c], [d, e, f], [g, h, i]] = matrix;
+        const A = e * i - f * h;
+        const B = c * h - b * i;
+        const C = b * f - c * e;
+        const D = f * g - d * i;
+        const E = a * i - c * g;
+        const F = c * d - a * f;
+        const G = d * h - e * g;
+        const H = b * g - a * h;
+        const I = a * e - b * d;
+        const det = a * A + b * D + c * G;
+        return [
+          [A / det, B / det, C / det],
+          [D / det, E / det, F / det],
+          [G / det, H / det, I / det]
+        ];
+      }
+
+      function decodeSrgb(value) {
+        return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+      }
+
+      function encodeSrgb(value) {
+        return value <= 0.0031308 ? value * 12.92 : 1.055 * Math.pow(value, 1 / 2.4) - 0.055;
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, Number.isFinite(value) ? value : 0));
+      }
+
+      function safeRatio(value, divisor) {
+        return divisor ? value / divisor : 0;
+      }
+
+      function formatPercent(value, precision) {
+        return `${formatNumber((Number(value) || 0) * 100, precision)}%`;
+      }
+
+      function formatNumber(value, precision) {
+        if (!Number.isFinite(Number(value))) {
+          return "-";
+        }
+        const factor = Math.pow(10, precision);
+        const rounded = Math.round((Number(value) + Number.EPSILON) * factor) / factor;
+        return rounded.toLocaleString("zh-CN", {
+          maximumFractionDigits: precision,
+          minimumFractionDigits: precision
+        });
+      }
+
+      function formatMatrix(matrix) {
+        return matrix.map((row) => row.map((value) => formatNumber(value, 6)).join("  ")).join("\n");
+      }
+
+      function debounce(fn, delay) {
+        let timer = null;
+        return (...args) => {
+          window.clearTimeout(timer);
+          timer = window.setTimeout(() => fn(...args), delay);
+        };
+      }
+    </script>
+    <script src="../assets/platform-assistant.js?v=20260622-comfort-ppt-v2"></script>
+  </body>
+</html>

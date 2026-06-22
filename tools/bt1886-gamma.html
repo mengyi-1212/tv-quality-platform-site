@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>1886 Gamma 转换</title>
+    <link rel="stylesheet" href="../assets/platform-assistant.css?v=20260618-all-pages-v3" />
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --panel: #ffffff;
+        --ink: #1f2933;
+        --muted: #687583;
+        --line: #d8e0ea;
+        --blue: #206bc4;
+        --blue-dark: #1557a8;
+        --green: #2f855a;
+        --amber: #b7791f;
+        --red: #b94a55;
+        --track: #edf2f7;
+        --radius: 8px;
+        --shadow: 0 4px 18px rgba(24, 36, 51, 0.08);
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .tool-nav {
+        display: flex;
+        margin-bottom: 12px;
+      }
+
+      .back-button {
+        min-height: 36px;
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--blue);
+        font-weight: 800;
+      }
+
+      .back-button:hover {
+        border-color: var(--blue);
+        background: #edf3fb;
+      }
+
+      .header,
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 14px;
+        padding: 20px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 6px;
+        color: var(--blue);
+        font-size: 26px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 17px;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .header p,
+      .muted {
+        margin-bottom: 0;
+        color: var(--muted);
+      }
+
+      .formula {
+        min-width: 240px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #f8fbff;
+        color: var(--muted);
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 330px minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .control-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .field input,
+      .field select,
+      textarea {
+        width: 100%;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--ink);
+        padding: 8px 10px;
+        outline: none;
+      }
+
+      textarea {
+        min-height: 170px;
+        resize: vertical;
+        font-family: Consolas, "Courier New", monospace;
+        line-height: 1.45;
+      }
+
+      .field input:focus,
+      .field select:focus,
+      textarea:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(32, 107, 196, 0.14);
+      }
+
+      .inline-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .btn.primary {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #ffffff;
+      }
+
+      .btn.primary:hover {
+        background: var(--blue-dark);
+      }
+
+      .btn:hover {
+        border-color: #c5d3e3;
+        box-shadow: 0 6px 18px rgba(24, 36, 51, 0.1);
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .summary-card {
+        min-height: 88px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fbfcfe;
+      }
+
+      .summary-card span,
+      .summary-card em {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .summary-card strong {
+        display: block;
+        margin: 7px 0 4px;
+        color: var(--blue);
+        font-size: 22px;
+        line-height: 1.12;
+        overflow-wrap: anywhere;
+      }
+
+      .summary-card em {
+        font-style: normal;
+        font-weight: 700;
+      }
+
+      .chart-wrap {
+        margin-bottom: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+
+      table {
+        width: 100%;
+        min-width: 850px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 9px 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f8fafc;
+        color: #526071;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td.numeric {
+        font-family: Consolas, "Courier New", monospace;
+        font-weight: 700;
+      }
+
+      .notice {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #cfe0f5;
+        border-radius: var(--radius);
+        background: #edf3fb;
+        color: var(--blue);
+        font-weight: 800;
+      }
+
+      .notice.bad {
+        border-color: #efc3c7;
+        background: #fff0f1;
+        color: var(--red);
+      }
+
+      @media (max-width: 960px) {
+        .header,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header {
+          flex-direction: column;
+        }
+
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        .page {
+          padding: 12px;
+        }
+
+        .inline-grid,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="tool-nav">
+        <button class="back-button" type="button" onclick="goBackToToolList()">&larr; 返回工具入口</button>
+      </div>
+
+      <header class="header">
+        <div>
+          <h1>1886 Gamma 转换</h1>
+          <p>BT.1886 EOTF、普通 Gamma 曲线和灰阶码值批量转换</p>
+        </div>
+        <div class="formula">
+          L = (aV + b)^gamma<br />
+          a = Lw^(1/gamma) - Lb^(1/gamma)<br />
+          b = Lb^(1/gamma)
+        </div>
+      </header>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>参数</h2>
+          <div class="control-grid">
+            <div class="inline-grid">
+              <label class="field">
+                <span>白场亮度 Lw (nit)</span>
+                <input id="whiteLuminance" type="number" min="1" step="0.1" value="100" />
+              </label>
+              <label class="field">
+                <span>黑场亮度 Lb (nit)</span>
+                <input id="blackLuminance" type="number" min="0" step="0.0001" value="0.01" />
+              </label>
+            </div>
+
+            <div class="inline-grid">
+              <label class="field">
+                <span>Gamma</span>
+                <input id="gammaValue" type="number" min="1" max="4" step="0.01" value="2.4" />
+              </label>
+              <label class="field">
+                <span>码值位深</span>
+                <select id="bitDepth">
+                  <option value="8">8 bit</option>
+                  <option value="10" selected>10 bit</option>
+                  <option value="12">12 bit</option>
+                  <option value="14">14 bit</option>
+                  <option value="16">16 bit</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="inline-grid">
+              <label class="field">
+                <span>采样点数</span>
+                <input id="sampleCount" type="number" min="2" max="1025" step="1" value="33" />
+              </label>
+              <label class="field">
+                <span>输入类型</span>
+                <select id="inputMode">
+                  <option value="code" selected>码值</option>
+                  <option value="normalized">归一化 V</option>
+                  <option value="luminance">亮度 nit</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>批量输入</span>
+              <textarea id="batchInput" placeholder="可输入码值、归一化值或亮度值，支持空格/逗号/换行分隔"></textarea>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" type="button" id="convertBtn">转换</button>
+            <button class="btn" type="button" id="fillRampBtn">生成灰阶</button>
+            <button class="btn" type="button" id="copyCsvBtn">复制 CSV</button>
+            <button class="btn" type="button" id="downloadCsvBtn">下载 CSV</button>
+          </div>
+          <div class="notice" id="notice">默认生成 33 点 10-bit BT.1886 灰阶表。</div>
+        </section>
+
+        <section class="panel">
+          <h2>结果</h2>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <span>中灰 50%</span>
+              <strong id="midLuminance">-</strong>
+              <em>BT.1886 亮度</em>
+            </div>
+            <div class="summary-card">
+              <span>黑位抬升</span>
+              <strong id="blackLift">-</strong>
+              <em>相对纯 Gamma</em>
+            </div>
+            <div class="summary-card">
+              <span>输出点数</span>
+              <strong id="rowCount">0</strong>
+              <em>当前表格</em>
+            </div>
+            <div class="summary-card">
+              <span>有效峰值</span>
+              <strong id="peakLuminance">-</strong>
+              <em>白场亮度</em>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="curveChart" height="320"></canvas>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>输入</th>
+                  <th>归一化 V</th>
+                  <th>码值</th>
+                  <th>BT.1886 亮度</th>
+                  <th>普通 Gamma 亮度</th>
+                  <th>差值</th>
+                  <th>反算 V</th>
+                </tr>
+              </thead>
+              <tbody id="resultBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      function goBackToToolList() {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        window.location.href = "../index.html#debug-converter";
+      }
+
+      (function () {
+        "use strict";
+
+        const els = {
+          whiteLuminance: document.getElementById("whiteLuminance"),
+          blackLuminance: document.getElementById("blackLuminance"),
+          gammaValue: document.getElementById("gammaValue"),
+          bitDepth: document.getElementById("bitDepth"),
+          sampleCount: document.getElementById("sampleCount"),
+          inputMode: document.getElementById("inputMode"),
+          batchInput: document.getElementById("batchInput"),
+          convertBtn: document.getElementById("convertBtn"),
+          fillRampBtn: document.getElementById("fillRampBtn"),
+          copyCsvBtn: document.getElementById("copyCsvBtn"),
+          downloadCsvBtn: document.getElementById("downloadCsvBtn"),
+          notice: document.getElementById("notice"),
+          midLuminance: document.getElementById("midLuminance"),
+          blackLift: document.getElementById("blackLift"),
+          rowCount: document.getElementById("rowCount"),
+          peakLuminance: document.getElementById("peakLuminance"),
+          curveChart: document.getElementById("curveChart"),
+          resultBody: document.getElementById("resultBody")
+        };
+
+        let currentRows = [];
+
+        document.addEventListener("DOMContentLoaded", init);
+
+        function init() {
+          bindEvents();
+          fillRamp();
+          convert();
+        }
+
+        function bindEvents() {
+          [els.whiteLuminance, els.blackLuminance, els.gammaValue, els.bitDepth, els.sampleCount, els.inputMode].forEach((control) => {
+            control.addEventListener("input", convert);
+          });
+          els.batchInput.addEventListener("input", convert);
+          els.convertBtn.addEventListener("click", convert);
+          els.fillRampBtn.addEventListener("click", () => {
+            fillRamp();
+            convert();
+          });
+          els.copyCsvBtn.addEventListener("click", copyCsv);
+          els.downloadCsvBtn.addEventListener("click", downloadCsv);
+          window.addEventListener("resize", () => drawChart(currentRows));
+        }
+
+        function readConfig() {
+          const lw = Number(els.whiteLuminance.value);
+          const lb = Number(els.blackLuminance.value);
+          const gamma = Number(els.gammaValue.value);
+          const bitDepth = Number(els.bitDepth.value);
+          const maxCode = Math.pow(2, bitDepth) - 1;
+          const sampleCount = clamp(Math.round(Number(els.sampleCount.value) || 33), 2, 1025);
+          return { lw, lb, gamma, bitDepth, maxCode, sampleCount };
+        }
+
+        function validateConfig(config) {
+          if (!Number.isFinite(config.lw) || config.lw <= 0) {
+            return "白场亮度必须大于 0。";
+          }
+          if (!Number.isFinite(config.lb) || config.lb < 0) {
+            return "黑场亮度不能小于 0。";
+          }
+          if (config.lb >= config.lw) {
+            return "黑场亮度必须小于白场亮度。";
+          }
+          if (!Number.isFinite(config.gamma) || config.gamma <= 0) {
+            return "Gamma 必须大于 0。";
+          }
+          return "";
+        }
+
+        function fillRamp() {
+          const config = readConfig();
+          const values = [];
+          for (let index = 0; index < config.sampleCount; index += 1) {
+            const code = Math.round((index / (config.sampleCount - 1)) * config.maxCode);
+            values.push(code);
+          }
+          els.inputMode.value = "code";
+          els.batchInput.value = values.join("\n");
+        }
+
+        function convert() {
+          const config = readConfig();
+          const error = validateConfig(config);
+          if (error) {
+            currentRows = [];
+            renderRows([]);
+            drawChart([]);
+            setNotice(error, true);
+            return;
+          }
+
+          const values = parseInputValues(els.batchInput.value);
+          if (!values.length) {
+            currentRows = [];
+            renderRows([]);
+            drawChart([]);
+            setNotice("请输入要转换的值，或点击“生成灰阶”。", true);
+            return;
+          }
+
+          currentRows = values.map((input) => buildRow(input, config, els.inputMode.value));
+          renderRows(currentRows);
+          renderSummary(currentRows, config);
+          drawChart(currentRows);
+          setNotice(`已生成 ${currentRows.length} 行转换结果。`, false);
+        }
+
+        function parseInputValues(text) {
+          return String(text || "")
+            .split(/[\s,，;；]+/g)
+            .map((item) => Number(item.trim()))
+            .filter((value) => Number.isFinite(value));
+        }
+
+        function buildRow(input, config, mode) {
+          let v;
+          if (mode === "normalized") {
+            v = clamp(input, 0, 1);
+          } else if (mode === "luminance") {
+            v = bt1886Inverse(input, config);
+          } else {
+            v = clamp(input / config.maxCode, 0, 1);
+          }
+
+          const code = Math.round(v * config.maxCode);
+          const bt = bt1886Eotf(v, config);
+          const pure = pureGammaEotf(v, config);
+          const reverseV = bt1886Inverse(bt, config);
+          return {
+            input,
+            v,
+            code,
+            bt,
+            pure,
+            delta: bt - pure,
+            reverseV
+          };
+        }
+
+        function bt1886Eotf(v, config) {
+          const lbRoot = Math.pow(config.lb, 1 / config.gamma);
+          const lwRoot = Math.pow(config.lw, 1 / config.gamma);
+          const a = lwRoot - lbRoot;
+          return Math.pow(a * clamp(v, 0, 1) + lbRoot, config.gamma);
+        }
+
+        function bt1886Inverse(luminance, config) {
+          const lbRoot = Math.pow(config.lb, 1 / config.gamma);
+          const lwRoot = Math.pow(config.lw, 1 / config.gamma);
+          const a = lwRoot - lbRoot;
+          if (a <= 0) {
+            return 0;
+          }
+          return clamp((Math.pow(Math.max(Number(luminance) || 0, 0), 1 / config.gamma) - lbRoot) / a, 0, 1);
+        }
+
+        function pureGammaEotf(v, config) {
+          return config.lw * Math.pow(clamp(v, 0, 1), config.gamma);
+        }
+
+        function renderRows(rows) {
+          els.rowCount.textContent = rows.length;
+          if (!rows.length) {
+            els.resultBody.innerHTML = `<tr><td colspan="7">没有转换结果。</td></tr>`;
+            return;
+          }
+          els.resultBody.innerHTML = rows
+            .map(
+              (row) => `
+                <tr>
+                  <td class="numeric">${formatNumber(row.input, 6)}</td>
+                  <td class="numeric">${formatNumber(row.v, 6)}</td>
+                  <td class="numeric">${row.code}</td>
+                  <td class="numeric">${formatNumber(row.bt, 6)}</td>
+                  <td class="numeric">${formatNumber(row.pure, 6)}</td>
+                  <td class="numeric">${formatNumber(row.delta, 6)}</td>
+                  <td class="numeric">${formatNumber(row.reverseV, 6)}</td>
+                </tr>
+              `
+            )
+            .join("");
+        }
+
+        function renderSummary(rows, config) {
+          const mid = bt1886Eotf(0.5, config);
+          const pureMid = pureGammaEotf(0.5, config);
+          els.midLuminance.textContent = `${formatNumber(mid, 4)} nit`;
+          els.blackLift.textContent = `${formatNumber(mid - pureMid, 4)} nit`;
+          els.peakLuminance.textContent = `${formatNumber(config.lw, 2)} nit`;
+          els.rowCount.textContent = rows.length;
+        }
+
+        function drawChart(rows) {
+          const canvas = els.curveChart;
+          const ctx = canvas.getContext("2d");
+          const config = readConfig();
+          const ratio = window.devicePixelRatio || 1;
+          const width = canvas.clientWidth || 800;
+          const height = 320;
+          canvas.width = Math.round(width * ratio);
+          canvas.height = Math.round(height * ratio);
+          ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+          ctx.clearRect(0, 0, width, height);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, width, height);
+
+          const pad = { left: 54, right: 18, top: 24, bottom: 38 };
+          const chartWidth = width - pad.left - pad.right;
+          const chartHeight = height - pad.top - pad.bottom;
+          const maxY = Math.max(config.lw, ...rows.map((row) => row.bt), 1);
+
+          ctx.strokeStyle = "#d8e0ea";
+          ctx.lineWidth = 1;
+          for (let i = 0; i <= 4; i += 1) {
+            const y = pad.top + chartHeight * (i / 4);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, y);
+            ctx.lineTo(width - pad.right, y);
+            ctx.stroke();
+            ctx.fillStyle = "#687583";
+            ctx.font = "11px Segoe UI, Microsoft YaHei, Arial";
+            ctx.fillText(formatNumber(maxY * (1 - i / 4), 1), 8, y + 4);
+          }
+
+          drawCurve(ctx, config, pad, chartWidth, chartHeight, maxY, bt1886Eotf, "#206bc4");
+          drawCurve(ctx, config, pad, chartWidth, chartHeight, maxY, pureGammaEotf, "#b7791f");
+
+          ctx.fillStyle = "#206bc4";
+          ctx.fillRect(pad.left, 8, 22, 3);
+          ctx.fillStyle = "#1f2933";
+          ctx.fillText("BT.1886", pad.left + 30, 12);
+          ctx.fillStyle = "#b7791f";
+          ctx.fillRect(pad.left + 104, 8, 22, 3);
+          ctx.fillStyle = "#1f2933";
+          ctx.fillText("普通 Gamma", pad.left + 134, 12);
+
+          rows.forEach((row) => {
+            const x = pad.left + row.v * chartWidth;
+            const y = pad.top + chartHeight - (row.bt / maxY) * chartHeight;
+            ctx.fillStyle = "#2f855a";
+            ctx.beginPath();
+            ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          ctx.fillStyle = "#687583";
+          ctx.font = "12px Segoe UI, Microsoft YaHei, Arial";
+          ctx.fillText("V", width - pad.right - 8, height - 12);
+          ctx.fillText("nit", 8, 18);
+        }
+
+        function drawCurve(ctx, config, pad, chartWidth, chartHeight, maxY, fn, color) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i <= 200; i += 1) {
+            const v = i / 200;
+            const value = fn(v, config);
+            const x = pad.left + v * chartWidth;
+            const y = pad.top + chartHeight - (value / maxY) * chartHeight;
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.stroke();
+        }
+
+        function getCsv() {
+          const header = ["input", "normalized_v", "code", "bt1886_luminance", "pure_gamma_luminance", "delta", "reverse_v"];
+          const lines = currentRows.map((row) => [row.input, row.v, row.code, row.bt, row.pure, row.delta, row.reverseV].join(","));
+          return [header.join(","), ...lines].join("\n");
+        }
+
+        function copyCsv() {
+          if (!currentRows.length) {
+            setNotice("没有可复制的结果。", true);
+            return;
+          }
+          const text = getCsv();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => setNotice("CSV 已复制。", false));
+            return;
+          }
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+          setNotice("CSV 已复制。", false);
+        }
+
+        function downloadCsv() {
+          if (!currentRows.length) {
+            setNotice("没有可下载的结果。", true);
+            return;
+          }
+          const blob = new Blob([getCsv()], { type: "text/csv;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "bt1886-gamma.csv";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+          setNotice("CSV 已生成下载。", false);
+        }
+
+        function setNotice(message, bad) {
+          els.notice.textContent = message;
+          els.notice.classList.toggle("bad", Boolean(bad));
+        }
+
+        function clamp(value, min, max) {
+          return Math.min(max, Math.max(min, Number(value) || 0));
+        }
+
+        function formatNumber(value, precision) {
+          if (!Number.isFinite(Number(value))) {
+            return "-";
+          }
+          return Number(value).toLocaleString("zh-CN", {
+            maximumFractionDigits: precision,
+            minimumFractionDigits: precision
+          });
+        }
+      })();
+    </script>
+    <script src="../assets/platform-assistant.js?v=20260622-comfort-ppt-v2"></script>
+  </body>
+</html>

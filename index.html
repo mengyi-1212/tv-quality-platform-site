@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>画质数据分析与辅助工具平台</title>
+    <link rel="stylesheet" href="assets/styles.css?v=20260622-comfort-ppt-v1" />
+  </head>
+  <body data-active-view="home">
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brandmark">
+          <div class="brandmark-symbol">TV</div>
+          <div>
+            <strong>画质平台</strong>
+            <span>Data Tools</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item nav-home is-active" type="button" data-view="home">
+            <i data-lucide="layout-dashboard"></i>
+            <span>分类入口</span>
+          </button>
+          <button class="nav-item" type="button" data-view="data">
+            <i data-lucide="database"></i>
+            <span>客观数据分析</span>
+          </button>
+          <button class="nav-item" type="button" data-view="lab">
+            <i data-lucide="flask-conical"></i>
+            <span>实验设计</span>
+          </button>
+          <button class="nav-item" type="button" data-view="debug-converter">
+            <i data-lucide="sliders-horizontal"></i>
+            <span>画质调试转换工具</span>
+          </button>
+          <button class="nav-item" type="button" data-view="reports">
+            <i data-lucide="file-text"></i>
+            <span>竞品分析报告</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span id="datasetVersion">v0.1</span>
+          <span id="storageState">本地数据</span>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Picture Quality Data Tools</p>
+            <h1>画质数据分析与<span>辅助工具平台</span></h1>
+            <p class="top-subtitle">Data Analysis · Experiment Modules · Assistant Tools</p>
+          </div>
+          <div class="portal-account">Picture Quality Platform</div>
+          <div class="top-actions">
+            <button class="icon-button ghost" type="button" id="resetDataBtn" title="恢复示例数据">
+              <i data-lucide="rotate-ccw"></i>
+              <span>重置</span>
+            </button>
+            <button class="icon-button ghost" type="button" id="exportSelectedBtn" title="导出已选数据">
+              <i data-lucide="package-open"></i>
+              <span>导出已选</span>
+            </button>
+            <button class="icon-button primary" type="button" id="exportAllBtn" title="导出全部数据">
+              <i data-lucide="download"></i>
+              <span>导出全部</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="notice" id="appNotice" hidden></div>
+
+        <aside class="ai-assistant-panel is-collapsed" id="aiAssistantPanel" aria-label="AI助手">
+          <button class="ai-bunny-trigger" type="button" id="aiAssistantToggle" aria-label="唤醒AI助手" aria-expanded="false" aria-controls="aiAssistantDialog">
+            <div class="ai-bunny-avatar" aria-hidden="true">
+              <span class="ai-bunny-ear ai-bunny-ear-left">
+                <span></span>
+              </span>
+              <span class="ai-bunny-ear ai-bunny-ear-right">
+                <span></span>
+              </span>
+              <span class="ai-bunny-face">
+                <span class="ai-bunny-eye ai-bunny-eye-left"></span>
+                <span class="ai-bunny-eye ai-bunny-eye-right"></span>
+                <span class="ai-bunny-nose"></span>
+                <span class="ai-bunny-mouth"></span>
+                <span class="ai-bunny-cheek ai-bunny-cheek-left"></span>
+                <span class="ai-bunny-cheek ai-bunny-cheek-right"></span>
+              </span>
+              <span class="ai-bunny-paw"></span>
+            </div>
+          </button>
+          <div class="ai-assistant-dialog" id="aiAssistantDialog" aria-hidden="true">
+            <div class="ai-assistant-head">
+              <div>
+                <span class="ai-kicker">AI Assistant</span>
+                <h2>AI助手</h2>
+              </div>
+              <button class="ai-assistant-close" type="button" id="aiAssistantClose" title="收起AI助手" aria-label="收起AI助手">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <label class="ai-search-box">
+              <span>输入你要找的信息或工具</span>
+              <textarea id="aiAssistantInput" rows="4" placeholder="例如：打开色域转换、查找TCL75Q9M报告、生成PPT、亮度数据、Real Scene"></textarea>
+            </label>
+            <div class="ai-scope">当前范围：<strong id="aiAssistantScope">平台资料</strong></div>
+            <div class="ai-quick-prompts" id="aiQuickPrompts" aria-label="常用搜索"></div>
+            <div class="ai-answer" id="aiAssistantAnswer" aria-live="polite"></div>
+            <div class="ai-results" id="aiAssistantResults" aria-live="polite" aria-label="搜索结果"></div>
+          </div>
+        </aside>
+
+        <section class="view-panel portal-panel is-active" data-view-panel="home">
+          <div class="portal-grid">
+            <button class="portal-card accent-blue" type="button" data-view-target="data">
+              <span class="portal-icon"><i data-lucide="database"></i></span>
+              <strong>客观数据分析</strong>
+              <span>Objective Data Analysis</span>
+              <em>进入分析 →</em>
+            </button>
+
+            <button class="portal-card accent-rose" type="button" data-view-target="lab">
+              <span class="portal-icon"><i data-lucide="flask-conical"></i></span>
+              <strong>实验设计</strong>
+              <span>Experiment Design</span>
+              <em>进入设计 →</em>
+            </button>
+
+            <button class="portal-card accent-green" type="button" data-view-target="debug-converter">
+              <span class="portal-icon"><i data-lucide="sliders-horizontal"></i></span>
+              <strong>画质调试转换工具</strong>
+              <span>PQ Debug Converters</span>
+              <em>进入工具 →</em>
+            </button>
+
+            <button class="portal-card accent-amber" type="button" data-view-target="reports">
+              <span class="portal-icon"><i data-lucide="file-text"></i></span>
+              <strong>竞品分析报告</strong>
+              <span>Competitive Reports</span>
+              <em>查看报告 →</em>
+            </button>
+          </div>
+        </section>
+
+        <section class="view-panel" data-view-panel="data">
+          <div class="section-head">
+            <div>
+              <h2>客观数据分析</h2>
+            </div>
+            <div class="selection-pill" id="selectionPill">已选 0 项</div>
+          </div>
+
+          <section class="objective-modules" aria-label="客观数据分析模块">
+            <button class="objective-card is-active" type="button" data-analysis-module="brightness">
+              <span class="objective-icon"><i data-lucide="sun-medium"></i></span>
+              <strong>亮度</strong>
+              <em>峰值亮度、全白场、Real Scene、黑场亮度</em>
+            </button>
+            <button class="objective-card" type="button" data-analysis-module="color">
+              <span class="objective-icon"><i data-lucide="palette"></i></span>
+              <strong>颜色</strong>
+              <em>色域、色准、白平衡、DeltaE、色温</em>
+            </button>
+            <button class="objective-card" type="button" data-analysis-module="contrast">
+              <span class="objective-icon"><i data-lucide="contrast"></i></span>
+              <strong>屏对比度</strong>
+              <em>屏本体对比度、开LD后对比度</em>
+            </button>
+            <button class="objective-card" type="button" data-analysis-module="hardware">
+              <span class="objective-icon"><i data-lucide="cpu"></i></span>
+              <strong>硬件规格</strong>
+              <em>背光分区、刷新率、芯片信息、屏体信息</em>
+            </button>
+          </section>
+
+          <section class="brightness-analysis-panel" id="brightnessAnalysisPanel" aria-label="亮度客观数据对比">
+            <div class="brightness-analysis-head">
+              <div class="brightness-filter-row">
+                <label class="field compact">
+                  <span class="filter-search-control">
+                    <i data-lucide="search"></i>
+                    <input id="searchInput" type="search" autocomplete="off" placeholder="输入品牌或机型" aria-label="查找品牌或机型" />
+                  </span>
+                </label>
+                <label class="field compact">
+                  <select id="brightnessSizeFilter" aria-label="尺寸分类"></select>
+                </label>
+                <label class="field compact">
+                  <select id="brightnessPriceFilter" aria-label="价格分类"></select>
+                </label>
+                <span id="machineCountPill" hidden>测试机器 0 台</span>
+                <select id="brandFilter" hidden></select>
+                <select id="panelFilter" hidden></select>
+                <select id="signalFilter" hidden></select>
+                <select id="yearFilter" hidden></select>
+                <select id="sortSelect" hidden>
+                  <option value="score-desc">综合分从高到低</option>
+                  <option value="hdrPeak-desc">HDR 峰值亮度</option>
+                  <option value="colorCheckerDeltaE-asc">色准 DeltaE</option>
+                  <option value="inputLag4k120-asc">4K120 输入延迟</option>
+                  <option value="date-desc">测试日期</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="brightness-comparison-layout">
+              <aside class="brightness-selector-panel">
+                <div class="detail-title">
+                  <div>
+                    <h3>机型选择</h3>
+                    <div class="muted" id="brightnessSelectionHint">选择机型进行对比</div>
+                  </div>
+                  <button class="icon-button ghost small" type="button" id="brightnessClearSelectionBtn">
+                    <i data-lucide="x"></i>
+                    <span>清空</span>
+                  </button>
+                </div>
+                <div class="brightness-model-list" id="brightnessModelOptions"></div>
+              </aside>
+
+              <div class="brightness-chart-panel">
+                <div class="brightness-chart-head">
+                  <div class="brightness-metric-tabs" role="tablist" aria-label="亮度指标">
+                    <button class="is-active" type="button" data-brightness-metric="all">全指标</button>
+                    <button type="button" data-brightness-metric="fullWhite">全白场</button>
+                    <button type="button" data-brightness-metric="blackLevel">黑场</button>
+                    <button type="button" data-brightness-metric="transientPeak">瞬态峰值</button>
+                    <button type="button" data-brightness-metric="realScene">Real Scene</button>
+                  </div>
+                </div>
+                <div class="brightness-metric-grid" id="brightnessMetricCards"></div>
+                <canvas id="brightnessChart" height="420"></canvas>
+              </div>
+            </div>
+
+            <div class="table-wrap brightness-table-wrap">
+              <table class="records-table brightness-table">
+                <thead>
+                  <tr>
+                    <th>机型</th>
+                    <th>尺寸</th>
+                    <th>价格分类</th>
+                    <th>全白场亮度</th>
+                    <th>黑场亮度</th>
+                    <th>瞬态峰值亮度</th>
+                    <th>Real Scene</th>
+                    <th>来源</th>
+                  </tr>
+                </thead>
+                <tbody id="brightnessTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="brightness-analysis-panel color-analysis-panel" id="colorAnalysisPanel" aria-label="颜色客观数据对比" hidden>
+            <div class="brightness-analysis-head">
+              <div class="brightness-filter-row">
+                <label class="field compact">
+                  <span class="filter-search-control">
+                    <i data-lucide="search"></i>
+                    <input id="colorSearchInput" type="search" autocomplete="off" placeholder="输入品牌或机型" aria-label="查找品牌或机型" />
+                  </span>
+                </label>
+                <label class="field compact">
+                  <select id="colorSizeFilter" aria-label="尺寸分类"></select>
+                </label>
+                <label class="field compact">
+                  <select id="colorPriceFilter" aria-label="价格分类"></select>
+                </label>
+              </div>
+            </div>
+
+            <div class="brightness-comparison-layout">
+              <aside class="brightness-selector-panel">
+                <div class="detail-title">
+                  <div>
+                    <h3>机型选择</h3>
+                    <div class="muted" id="colorSelectionHint">选择机型进行对比</div>
+                  </div>
+                  <button class="icon-button ghost small" type="button" id="colorClearSelectionBtn">
+                    <i data-lucide="x"></i>
+                    <span>清空</span>
+                  </button>
+                </div>
+                <div class="brightness-model-list" id="colorModelOptions"></div>
+              </aside>
+
+              <div class="brightness-chart-panel">
+                <div class="brightness-chart-head">
+                  <div class="brightness-metric-tabs" role="tablist" aria-label="颜色指标">
+                    <button class="is-active" type="button" data-color-metric="all">全指标</button>
+                    <button type="button" data-color-metric="colorGamut">色域</button>
+                    <button type="button" data-color-metric="colorAccuracy">色准</button>
+                    <button type="button" data-color-metric="colorTemperature">色温</button>
+                  </div>
+                </div>
+                <div class="brightness-metric-grid color-metric-grid" id="colorMetricCards"></div>
+                <canvas id="colorChart" height="420"></canvas>
+              </div>
+            </div>
+
+            <div class="table-wrap brightness-table-wrap">
+              <table class="records-table brightness-table color-table">
+                <thead>
+                  <tr>
+                    <th>机型</th>
+                    <th>尺寸</th>
+                    <th>色域</th>
+                    <th>色准</th>
+                    <th>色温</th>
+                    <th>来源</th>
+                  </tr>
+                </thead>
+                <tbody id="colorTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="brightness-analysis-panel contrast-analysis-panel" id="contrastAnalysisPanel" aria-label="屏对比度客观数据对比" hidden>
+            <div class="brightness-analysis-head">
+              <div class="brightness-filter-row">
+                <label class="field compact">
+                  <span class="filter-search-control">
+                    <i data-lucide="search"></i>
+                    <input id="contrastSearchInput" type="search" autocomplete="off" placeholder="输入品牌或机型" aria-label="查找品牌或机型" />
+                  </span>
+                </label>
+                <label class="field compact">
+                  <select id="contrastSizeFilter" aria-label="尺寸分类"></select>
+                </label>
+                <label class="field compact">
+                  <select id="contrastPriceFilter" aria-label="价格分类"></select>
+                </label>
+              </div>
+            </div>
+
+            <div class="brightness-comparison-layout">
+              <aside class="brightness-selector-panel">
+                <div class="detail-title">
+                  <div>
+                    <h3>机型选择</h3>
+                    <div class="muted" id="contrastSelectionHint">选择机型进行对比</div>
+                  </div>
+                  <button class="icon-button ghost small" type="button" id="contrastClearSelectionBtn">
+                    <i data-lucide="x"></i>
+                    <span>清空</span>
+                  </button>
+                </div>
+                <div class="brightness-model-list" id="contrastModelOptions"></div>
+              </aside>
+
+              <div class="brightness-chart-panel">
+                <div class="brightness-chart-head">
+                  <div class="brightness-metric-tabs" role="tablist" aria-label="屏对比度指标">
+                    <button class="is-active" type="button" data-contrast-metric="all">全指标</button>
+                    <button type="button" data-contrast-metric="nativeContrast">屏本体</button>
+                    <button type="button" data-contrast-metric="localDimmingContrast">开LD后</button>
+                  </div>
+                </div>
+                <div class="brightness-metric-grid contrast-metric-grid" id="contrastMetricCards"></div>
+                <canvas id="contrastChart" height="420"></canvas>
+              </div>
+            </div>
+
+            <div class="table-wrap brightness-table-wrap">
+              <table class="records-table brightness-table contrast-table">
+                <thead>
+                  <tr>
+                    <th>机型</th>
+                    <th>尺寸</th>
+                    <th>屏本体对比度</th>
+                    <th>开LD后对比度</th>
+                    <th>来源</th>
+                  </tr>
+                </thead>
+                <tbody id="contrastTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="brightness-analysis-panel hardware-analysis-panel" id="hardwareAnalysisPanel" aria-label="硬件规格数据汇总" hidden>
+            <div class="brightness-analysis-head">
+              <div class="brightness-filter-row hardware-filter-row">
+                <label class="field compact">
+                  <span class="filter-search-control">
+                    <i data-lucide="search"></i>
+                    <input id="hardwareSearchInput" type="search" autocomplete="off" placeholder="输入机型或报告名称" aria-label="查找机型或报告名称" />
+                  </span>
+                </label>
+                <label class="field compact">
+                  <select id="hardwareSizeFilter" aria-label="尺寸分类"></select>
+                </label>
+              </div>
+            </div>
+
+            <div class="brightness-metric-grid hardware-metric-grid" id="hardwareMetricCards"></div>
+
+            <div class="table-wrap brightness-table-wrap">
+              <table class="records-table brightness-table hardware-table">
+                <thead>
+                  <tr>
+                    <th>机型 / 报告</th>
+                    <th>尺寸</th>
+                    <th>背光 / LD 分区</th>
+                    <th>刷新率</th>
+                    <th>芯片信息</th>
+                    <th>屏体信息</th>
+                    <th>来源</th>
+                  </tr>
+                </thead>
+                <tbody id="hardwareTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="raw-data-panel">
+            <div class="raw-data-head">
+              <div>
+                <h3 id="activeAnalysisTitle">亮度数据</h3>
+                <p id="activeAnalysisHint">来源：桌面 / 测试原始数据</p>
+              </div>
+              <label class="field compact">
+                <span>查找入口</span>
+                <input id="rawFileSearch" type="search" autocomplete="off" placeholder="输入品牌或机型" />
+              </label>
+            </div>
+            <div class="raw-data-layout">
+              <div class="table-wrap">
+                <table class="records-table raw-files-table">
+                  <thead>
+                    <tr>
+                      <th>文件</th>
+                      <th>类型</th>
+                      <th>大小</th>
+                      <th>更新时间</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rawFilesBody"></tbody>
+                </table>
+              </div>
+              <aside class="raw-preview" id="rawPreview"></aside>
+            </div>
+          </section>
+
+          <div class="data-layout">
+            <div class="table-wrap">
+              <table class="records-table">
+                <thead>
+                  <tr>
+                    <th class="checkbox-cell">
+                      <input id="selectAllVisible" type="checkbox" aria-label="选择当前筛选结果" />
+                    </th>
+                    <th>电视</th>
+                    <th>模式</th>
+                    <th>面板</th>
+                    <th>HDR 峰值</th>
+                    <th>色准</th>
+                    <th>游戏延迟</th>
+                    <th>综合</th>
+                    <th>日期</th>
+                  </tr>
+                </thead>
+                <tbody id="recordsBody"></tbody>
+              </table>
+            </div>
+
+            <aside class="record-detail" id="recordDetail" aria-live="polite">
+              <div class="empty-state">
+                <i data-lucide="panel-right-open"></i>
+                <strong>未选中记录</strong>
+                <span>从左侧表格打开单条详情</span>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view-panel" data-view-panel="lab">
+          <div class="section-head">
+            <div>
+              <h2>实验设计</h2>
+            </div>
+          </div>
+
+          <section class="converter-tool-list experiment-module-list" aria-label="实验设计模块">
+            <a class="converter-tool-card" href="tools/dynamic-comfort-brightness.html?v=20260612-eye-lr-system">
+              <span class="converter-tool-icon"><i data-lucide="sun-medium"></i></span>
+              <strong>人眼舒适亮度模型</strong>
+              <span>Human Visual Comfort Brightness Model</span>
+              <em>进入模块 →</em>
+            </a>
+
+            <article class="converter-tool-card presentation-tool-card">
+              <span class="converter-tool-icon"><i data-lucide="presentation"></i></span>
+              <strong>人眼舒适亮度模型项目汇报</strong>
+              <span>Comfort Brightness Project Presentation · 6.22</span>
+              <div class="presentation-card-actions">
+                <a href="tools/comfort-brightness-presentation.html">打开汇报</a>
+                <a href="data/presentations/人眼舒适亮度模型项目汇报6.22.pptx" download>下载 PPT</a>
+              </div>
+            </article>
+
+            <a class="converter-tool-card" href="tools/hisense-bc-application.html?v=20260609-bc">
+              <span class="converter-tool-icon"><i data-lucide="blocks"></i></span>
+              <strong>海信四色B/C应用</strong>
+              <span>Hisense Four-Color B/C Application</span>
+              <em>进入模块 →</em>
+            </a>
+
+            <button class="converter-tool-card" type="button">
+              <span class="converter-tool-icon"><i data-lucide="gauge"></i></span>
+              <strong>BGB-R电流配比</strong>
+              <span>BGB-R Current Ratio</span>
+              <em>进入模块 →</em>
+            </button>
+          </section>
+        </section>
+
+        <section class="view-panel" data-view-panel="reports">
+          <div class="section-head">
+            <div>
+              <h2>竞品分析报告</h2>
+            </div>
+            <label class="field compact" id="reportSearchField">
+              <span>报告筛选</span>
+              <input id="reportSearch" type="search" autocomplete="off" placeholder="报告名、品牌、型号" />
+            </label>
+          </div>
+
+          <section class="objective-modules report-modules" aria-label="竞品分析报告模块">
+            <button class="objective-card is-active" type="button" data-report-module="analysis">
+              <span class="objective-icon"><i data-lucide="file-search"></i></span>
+              <strong>分析报告</strong>
+              <em>管理竞品分析过程文档、原始 DOCX/PDF 报告和分析资料</em>
+            </button>
+            <button class="objective-card" type="button" data-report-module="output">
+              <span class="objective-icon"><i data-lucide="file-output"></i></span>
+              <strong>输出报告</strong>
+              <em>管理最终输出版本、交付报告和后续生成的报告文件</em>
+            </button>
+            <button class="objective-card" type="button" data-report-module="mapping">
+              <span class="objective-icon"><i data-lucide="workflow"></i></span>
+              <strong>数据与模板映射</strong>
+              <em>维护底层数据、PPT 字段映射，并一键生成报告</em>
+            </button>
+          </section>
+
+          <section class="raw-data-panel" id="reportListPanel">
+            <div class="raw-data-head">
+              <div>
+                <h3 id="activeReportTitle">分析报告</h3>
+                <p id="activeReportHint">来源：桌面 / 测试原始数据</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="records-table reports-table">
+                <thead>
+                  <tr>
+                    <th>报告</th>
+                    <th>类型</th>
+                    <th>大小</th>
+                    <th>更新时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="raw-data-panel report-builder-panel" id="reportBuilderPanel" hidden>
+            <div class="raw-data-head">
+              <div>
+                <h3 id="reportBuilderTitle">数据与模板映射</h3>
+                <p id="reportBuilderHint">上传 PPT 模板和底层 Excel/CSV，维护字段映射后生成报告。</p>
+              </div>
+              <div class="raw-actions">
+                <button class="icon-button ghost small" type="button" id="autoMapFieldsBtn">
+                  <i data-lucide="wand-sparkles"></i>
+                  <span>自动匹配</span>
+                </button>
+                <button class="icon-button primary small" type="button" id="generatePptBtn">
+                  <i data-lucide="file-output"></i>
+                  <span>生成 PPT</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="report-builder-grid">
+              <label class="report-upload-box">
+                <span>PPT 报告模板</span>
+                <strong id="pptTemplateStatus">未上传</strong>
+                <em>支持 .pptx/.pptm，保留原版式并替换文本字段</em>
+                <input id="pptTemplateInput" type="file" accept=".ppt,.pptx,.pptm,application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+              </label>
+              <label class="report-upload-box">
+                <span>底层数据 Excel/CSV</span>
+                <strong id="csvDataStatus">未上传</strong>
+                <em>支持 .xlsx/.xlsm 多 sheet，也兼容 CSV</em>
+                <input id="csvDataInput" type="file" accept=".xlsx,.xlsm,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12,text/csv" />
+              </label>
+              <div class="report-status-box">
+                <span>映射状态</span>
+                <strong id="mappingStatus">待维护</strong>
+                <em id="mappingSummary">上传文件后可自动提取字段。</em>
+              </div>
+            </div>
+
+            <div class="report-builder-actions">
+              <button class="icon-button ghost small" type="button" id="extractPptFieldsBtn">
+                <i data-lucide="scan-text"></i>
+                <span>重新提取 PPT 文本</span>
+              </button>
+              <button class="icon-button ghost small" type="button" id="clearReportBuilderBtn">
+                <i data-lucide="trash-2"></i>
+                <span>清空映射</span>
+              </button>
+            </div>
+
+            <section class="report-subsection">
+              <div class="report-subsection-head">
+                <div>
+                  <h4>底层数据维护</h4>
+                  <p>Excel/CSV 会解析成“字段-值”；Excel 会读取所有 sheet，也可以手动补充结论、负责人、优先级等文本字段。</p>
+                </div>
+              </div>
+              <div class="report-field-editor">
+                <label class="field">
+                  <span>字段名称</span>
+                  <input id="dataFieldNameInput" type="text" placeholder="例如：结论摘要" />
+                </label>
+                <label class="field">
+                  <span>字段值</span>
+                  <input id="dataFieldValueInput" type="text" placeholder="填写要写入 PPT 的内容" />
+                </label>
+                <label class="field">
+                  <span>备注</span>
+                  <input id="dataFieldNoteInput" type="text" placeholder="可选：来源、口径或说明" />
+                </label>
+                <button class="icon-button primary small" type="button" id="saveDataFieldBtn">
+                  <i data-lucide="plus"></i>
+                  <span>保存字段</span>
+                </button>
+              </div>
+              <div class="table-wrap report-table-wrap">
+                <table class="records-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>字段</th>
+                      <th>值</th>
+                      <th>来源</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reportDataBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="report-subsection">
+              <div class="report-subsection-head">
+                <div>
+                  <h4>PPT 字段映射</h4>
+                  <p>“PPT 目标文本”填写模板中需要被替换的文本；生成时会替换所有匹配文本。</p>
+                </div>
+              </div>
+              <div class="report-field-editor mapping-editor">
+                <label class="field">
+                  <span>PPT 目标文本</span>
+                  <input id="mappingSourceInput" type="text" list="pptTextCandidates" placeholder="例如：TCL75Q9M 或 {品牌型号A}" />
+                  <datalist id="pptTextCandidates"></datalist>
+                </label>
+                <label class="field">
+                  <span>底层数据字段</span>
+                  <select id="mappingDataSelect"></select>
+                </label>
+                <label class="field">
+                  <span>默认值</span>
+                  <input id="mappingFallbackInput" type="text" placeholder="字段为空时使用" />
+                </label>
+                <button class="icon-button primary small" type="button" id="addMappingBtn">
+                  <i data-lucide="link"></i>
+                  <span>添加映射</span>
+                </button>
+              </div>
+              <div class="table-wrap report-table-wrap">
+                <table class="records-table compact-table mapping-table">
+                  <thead>
+                    <tr>
+                      <th>PPT 目标文本</th>
+                      <th>底层数据字段</th>
+                      <th>生成值预览</th>
+                      <th>默认值</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reportMappingBody"></tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+        </section>
+
+        <section class="view-panel" data-view-panel="debug-converter">
+          <div class="section-head">
+            <div>
+              <h2>画质调试转换工具</h2>
+            </div>
+          </div>
+
+          <section class="converter-tool-list" id="converterToolList" aria-label="格式转换工具入口">
+            <a class="converter-tool-card" href="tools/color-gamut-converter.html?v=20260618-batch-xy-v2">
+              <span class="converter-tool-icon"><i data-lucide="palette"></i></span>
+              <strong>色域转换</strong>
+              <span>RGB / XYZ 色域矩阵转换，CIE 1931 / CIE 1976 马蹄图与覆盖率计算</span>
+              <em>打开工具 →</em>
+            </a>
+
+            <a class="converter-tool-card" href="tools/txt-to-ini.html?v=20260609-back">
+              <span class="converter-tool-icon"><i data-lucide="file-cog"></i></span>
+              <strong>光影平衡调试</strong>
+              <span>TXT转INI工具</span>
+              <em>打开工具 →</em>
+            </a>
+
+            <a class="converter-tool-card" href="tools/bt1886-gamma.html?v=20260609-backnav">
+              <span class="converter-tool-icon"><i data-lucide="line-chart"></i></span>
+              <strong>1886gamma转换</strong>
+              <span>BT.1886 / Gamma 曲线转换</span>
+              <em>打开工具 →</em>
+            </a>
+          </section>
+        </section>
+
+        <section class="view-panel" data-view-panel="import">
+          <div class="section-head">
+            <div>
+              <h2>数据导入</h2>
+            </div>
+            <div class="top-actions">
+              <label class="file-button" title="载入 JSON 文件">
+                <i data-lucide="upload"></i>
+                <span>文件</span>
+                <input id="jsonFileInput" type="file" accept="application/json,.json" />
+              </label>
+              <button class="icon-button ghost" type="button" id="validateJsonBtn" title="校验 JSON">
+                <i data-lucide="shield-check"></i>
+                <span>校验</span>
+              </button>
+              <button class="icon-button ghost" type="button" id="mergeJsonBtn" title="合并 JSON">
+                <i data-lucide="git-merge"></i>
+                <span>合并</span>
+              </button>
+              <button class="icon-button primary" type="button" id="replaceJsonBtn" title="替换数据">
+                <i data-lucide="replace"></i>
+                <span>替换</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="import-grid">
+            <label class="json-box">
+              <span>JSON 数据</span>
+              <textarea id="jsonInput" spellcheck="false"></textarea>
+            </label>
+            <section class="validation-panel" aria-live="polite">
+              <h3>校验结果</h3>
+              <div id="validationResult" class="validation-result"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view-panel" data-view-panel="schema">
+          <div class="section-head">
+            <div>
+              <h2>字段规范</h2>
+            </div>
+          </div>
+
+          <div class="schema-grid">
+            <section class="schema-panel">
+              <h3>记录字段</h3>
+              <div id="recordSchema" class="schema-list"></div>
+            </section>
+            <section class="schema-panel">
+              <h3>指标字段</h3>
+              <div class="table-wrap">
+                <table class="records-table compact-table">
+                  <thead>
+                    <tr>
+                      <th>Key</th>
+                      <th>名称</th>
+                      <th>分组</th>
+                      <th>单位</th>
+                      <th>方向</th>
+                    </tr>
+                  </thead>
+                  <tbody id="metricSchema"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script defer src="assets/vendor/jszip.min.js?v=3.10.1"></script>
+    <script defer src="data/sample-data.js?v=20260612-eye-lr-system"></script>
+    <script defer src="data/raw-manifest.js?v=20260612-eye-lr-system"></script>
+    <script defer src="assets/app.js?v=20260622-comfort-ppt-v2"></script>
+  </body>
+</html>

@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>海信四色 B/C 波长调用逻辑</title>
+    <link rel="stylesheet" href="../assets/platform-assistant.css?v=20260618-all-pages-v3" />
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --panel-alt: #f8fafc;
+        --ink: #182433;
+        --muted: #667085;
+        --line: #dce3ea;
+        --line-strong: #b8c2cc;
+        --blue: #206bc4;
+        --blue-dark: #1d60b3;
+        --green: #2fb344;
+        --amber: #f59f00;
+        --red: #d63939;
+        --radius: 8px;
+        --shadow: 0 8px 24px rgba(24, 36, 51, 0.06);
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      button {
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .tool-nav {
+        display: flex;
+        margin-bottom: 12px;
+      }
+
+      .back-button {
+        min-height: 36px;
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--blue);
+        font-weight: 800;
+      }
+
+      .back-button:hover {
+        border-color: var(--blue);
+        background: #edf3fb;
+      }
+
+      .header,
+      .panel,
+      .summary-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 14px;
+        padding: 20px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 6px;
+        color: var(--blue);
+        font-size: 26px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 17px;
+      }
+
+      h3 {
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .header p,
+      .muted {
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .source-note {
+        min-width: 280px;
+        max-width: 420px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #f8fbff;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .summary-card {
+        min-height: 122px;
+        padding: 13px;
+      }
+
+      .summary-card span,
+      .summary-card em {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 800;
+      }
+
+      .summary-card strong {
+        display: block;
+        margin: 8px 0 6px;
+        color: var(--blue);
+        font-size: 24px;
+        line-height: 1.1;
+      }
+
+      .summary-card em {
+        line-height: 1.5;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 14px;
+        align-items: stretch;
+      }
+
+      .panel {
+        min-width: 0;
+        padding: 14px;
+      }
+
+      .panel + .panel,
+      .subsection {
+        margin-top: 14px;
+      }
+
+      .grid > .panel + .panel {
+        margin-top: 0;
+      }
+
+      .step-list {
+        margin: 0;
+        padding-left: 20px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .step-list li + li {
+        margin-top: 7px;
+      }
+
+      .rule-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .rule-item {
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding: 9px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-alt);
+      }
+
+      .rule-item span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .rule-item strong {
+        color: var(--ink);
+        font-weight: 700;
+        line-height: 1.55;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      table {
+        width: 100%;
+        min-width: 960px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f8fafc;
+        color: #526071;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td:nth-child(3) {
+        font-weight: 800;
+      }
+
+      .scenario-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .scenario-card {
+        min-height: 128px;
+        padding: 11px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-alt);
+      }
+
+      .scenario-card strong,
+      .scenario-card span {
+        display: block;
+      }
+
+      .scenario-card strong {
+        margin-bottom: 7px;
+        color: var(--ink);
+      }
+
+      .scenario-card span {
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .conclusion {
+        border-left: 4px solid var(--blue);
+      }
+
+      .conclusion p {
+        margin-bottom: 10px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .conclusion p:last-child {
+        margin-bottom: 0;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: #edf3fb;
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      @media (max-width: 1080px) {
+        .summary-grid,
+        .scenario-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .page {
+          padding: 16px;
+        }
+
+        .header {
+          flex-direction: column;
+        }
+
+        .source-note {
+          min-width: 0;
+          max-width: none;
+        }
+
+        .summary-grid,
+        .scenario-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .rule-item {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="tool-nav">
+        <button class="back-button" type="button" onclick="goBackToToolList()">&larr; 返回实验设计</button>
+      </div>
+
+      <header class="header">
+        <div>
+          <h1>海信四色 B/C 波长调用逻辑</h1>
+          <p>基于桌面《海信85USX客观数据.csv》的 RGB 样本与客观光谱峰值，反推出四色背光中 R、G、B、C 四个波长的调用逻辑和应用场景。</p>
+          <div class="tag-row">
+            <span class="tag">Hisense 85USX</span>
+            <span class="tag">R=643nm</span>
+            <span class="tag">G=524nm</span>
+            <span class="tag">B=454nm</span>
+            <span class="tag">C=464nm</span>
+            <span class="tag">G 临界约 100</span>
+          </div>
+        </div>
+        <div class="source-note">
+          数据说明：CSV 未提供电流、PWM、时序或光谱面积，因此当前只能推导波长调用规则与场景逻辑，不能推导 B/C 电流占比。
+        </div>
+      </header>
+
+      <section class="summary-grid" aria-label="核心摘要">
+        <div class="summary-card">
+          <span>R 波长</span>
+          <strong>643nm</strong>
+          <em>红色主峰，用于红色及含红色相判断的基础波长。</em>
+        </div>
+        <div class="summary-card">
+          <span>G 波长</span>
+          <strong>524nm</strong>
+          <em>绿色主峰，用于绿色、黄绿和偏青触发判断的基础波长。</em>
+        </div>
+        <div class="summary-card">
+          <span>B 波长</span>
+          <strong>454nm</strong>
+          <em>短波蓝光，纯蓝、深蓝、偏紫、偏红蓝混合场景使用。</em>
+        </div>
+        <div class="summary-card">
+          <span>C 波长</span>
+          <strong>464nm</strong>
+          <em>长波青蓝，白灰、青绿、儿童模式与鲜艳模式偏青场景使用。</em>
+        </div>
+        <div class="summary-card">
+          <span>关键阈值</span>
+          <strong>G≥100</strong>
+          <em>鲜艳模式偏青方向，实验数据表现为 G&gt;R 且 G≥100 时触发 C。</em>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>推导过程</h2>
+          <ol class="step-list">
+            <li>先按光谱峰值分类：454/455/457nm 归为 B 或 B 主导短波，463/464nm 归为 C 或 C 主导长波。</li>
+            <li>再看模式门限：结论区记录 C 仅在鲜艳/儿童模式打开，儿童模式默认全开 C，其它模式默认使用 B。</li>
+            <li>在鲜艳模式内分 RGB 条件：R=G=B 且不为 0 时，各灰阶白都落到 464nm。</li>
+            <li>Green-Blue 色相扫描显示，R=0、B=255 时，G 从 60/80/90 到 100 后由 455/457nm 转为 464nm，因此可把 G≈100 作为偏青 C 触发临界点。</li>
+            <li>三色边缘验证显示 R&gt;G 的偏紫样本走 454nm，G&gt;R 且 G 高的偏青/黄绿样本走 464nm。</li>
+            <li>R=0、G=255、B=100/128 在客观图测中出现双峰波，暂归为 B+C 混合候选；主观画面未复现，不能作为量产规则定论。</li>
+          </ol>
+        </section>
+
+        <section class="panel">
+          <h2>应用判定规则</h2>
+          <div class="rule-list">
+            <div class="rule-item"><span>儿童模式</span><strong>直接使用 C，默认全开 464nm。</strong></div>
+            <div class="rule-item"><span>非鲜艳/非儿童</span><strong>默认使用 B，按 454nm 处理。</strong></div>
+            <div class="rule-item"><span>鲜艳模式白/灰</span><strong>R=G=B 且不为 0，使用 C。</strong></div>
+            <div class="rule-item"><span>鲜艳模式偏青绿</span><strong>G&gt;R 且 G≥100，使用 C。</strong></div>
+            <div class="rule-item"><span>鲜艳模式偏红紫</span><strong>色相有 R 且 R&gt;G，使用 B。</strong></div>
+            <div class="rule-item"><span>纯蓝/深蓝</span><strong>使用 B；低亮蓝光样本 0/0/128 为 454nm。</strong></div>
+            <div class="rule-item"><span>B+C 候选</span><strong>R=0、G=255、B=100/128 出现双峰，需补测确认。</strong></div>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel subsection">
+        <h2>实验矩阵与结果</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>实验模块</th>
+                <th>样本条件</th>
+                <th>观测波长</th>
+                <th>推导结论</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>纯色基准</strong></td>
+                <td>红、绿、蓝、青</td>
+                <td>643 / 524 / 454 / 464nm</td>
+                <td>确认四色背光中蓝侧有 454nm B 与 464nm C 两个可调用峰。</td>
+              </tr>
+              <tr>
+                <td><strong>Green-Blue Hue Sweep</strong></td>
+                <td>R=0、B=255；G=60/80/90 → G=100/110/120/128/255</td>
+                <td>455/457nm → 464nm</td>
+                <td>偏青方向的临界点约在 G=100；G&gt;R 且 G≥100 时转入 C。</td>
+              </tr>
+              <tr>
+                <td><strong>纯蓝向纯白过渡</strong></td>
+                <td>R=G=32/64/128/192/224，B=255；以及 255/255/255</td>
+                <td>454nm；白场 464nm</td>
+                <td>去饱和蓝不必然触发 C，只有完整白场转 C。</td>
+              </tr>
+              <tr>
+                <td><strong>灰阶白验证</strong></td>
+                <td>64/64/64、128/128/128、192/192/192、255/255/255</td>
+                <td>均为 464nm</td>
+                <td>C 不只用于高亮白场，各灰阶白/灰都使用 C。</td>
+              </tr>
+              <tr>
+                <td><strong>三色混合边缘</strong></td>
+                <td>255/64/255；64/255/255；128/255/255</td>
+                <td>454nm；464nm；464nm</td>
+                <td>R&gt;G 的偏紫样本用 B，G&gt;R 的偏青/黄绿样本用 C。</td>
+              </tr>
+              <tr>
+                <td><strong>双峰候选</strong></td>
+                <td>R=0、G=255、B=100/128</td>
+                <td>客观图测出现双峰</td>
+                <td>可能存在 B+C 同开或过渡混光，但主观画面未测到双峰，需二次验证。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel subsection">
+        <h2>应用场景归纳</h2>
+        <div class="scenario-grid">
+          <div class="scenario-card">
+            <strong>C：儿童/护眼白灰</strong>
+            <span>儿童模式默认 C；白、灰和大面积低饱和画面使用 464nm，可能是为了降低短波蓝占比。</span>
+          </div>
+          <div class="scenario-card">
+            <strong>C：鲜艳模式偏青绿</strong>
+            <span>青、黄绿、绿色占优的样本使用 C，规则可简化为 G&gt;R 且 G≥100。</span>
+          </div>
+          <div class="scenario-card">
+            <strong>B：蓝/紫/红蓝混合</strong>
+            <span>纯蓝、深蓝、偏紫，以及 R&gt;G 的红蓝混合样本使用 454nm。</span>
+          </div>
+          <div class="scenario-card">
+            <strong>B+C：低饱和绿蓝过渡</strong>
+            <span>R=0、G=255、B=100/128 需要补测谱图、模式和主观内容，当前只作为候选场景。</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel conclusion subsection">
+        <h2>实验结论</h2>
+        <p>海信 85USX 四色系统里，B 与 C 不是简单按蓝色亮度线性配比，而是受模式和色相共同控制。可落地的工程规则是：普通场景走 B；儿童、白灰和鲜艳模式偏青绿走 C；偏红紫和纯蓝走 B；双峰样本暂列为混光验证项。</p>
+        <p>当前 CSV 没有电流、PWM、时序或光谱面积数据，因此只能给出波长调用比例和场景规则，不能得出 B/C 电流占比。</p>
+      </section>
+
+    </main>
+
+    <script>
+      function goBackToToolList() {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        window.location.href = "../index.html#lab";
+      }
+    </script>
+    <script src="../assets/platform-assistant.js?v=20260622-comfort-ppt-v2"></script>
+  </body>
+</html>

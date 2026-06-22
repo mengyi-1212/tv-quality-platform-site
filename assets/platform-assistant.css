@@ -1,0 +1,299 @@
+.platform-ai-assistant,
+.platform-ai-assistant * {
+  box-sizing: border-box;
+}
+
+.platform-ai-assistant {
+  --platform-ai-blue: #206bc4;
+  --platform-ai-blue-dark: #1557a8;
+  --platform-ai-ink: #182433;
+  --platform-ai-muted: #667085;
+  --platform-ai-line: #dce3ea;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: min(350px, calc(100vw - 32px));
+  height: min(540px, calc(100vh - 32px));
+  padding: 9px;
+  border: 1px solid rgba(146, 188, 244, 0.76);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 36px rgba(23, 73, 132, 0.2), 0 0 0 3px rgba(74, 147, 255, 0.1);
+  color: var(--platform-ai-ink);
+  font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+  transition: border-radius 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.platform-ai-assistant.is-collapsed {
+  width: 62px;
+  height: 62px;
+  padding: 5px;
+  border-radius: 50%;
+  background: rgba(93, 151, 231, 0.32);
+  box-shadow: 0 12px 30px rgba(23, 73, 132, 0.26), 0 0 0 6px rgba(47, 109, 240, 0.14);
+}
+
+.platform-ai-assistant:not(.is-collapsed) {
+  display: block;
+}
+
+.platform-ai-assistant:not(.is-collapsed) > .platform-ai-trigger {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+}
+
+.platform-ai-assistant:not(.is-collapsed) .platform-ai-dialog {
+  width: 100%;
+  height: 100%;
+  padding-top: 58px;
+}
+
+.platform-ai-assistant:not(.is-collapsed) .platform-ai-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
+.platform-ai-trigger {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  padding: 0;
+  border: 1px solid #87b8f4;
+  border-radius: 50%;
+  background: #e8f3ff;
+  color: var(--platform-ai-blue);
+  box-shadow: inset 0 -6px 12px rgba(47, 109, 240, 0.14), 0 8px 20px rgba(47, 109, 240, 0.22);
+  cursor: pointer;
+}
+
+.platform-ai-trigger svg {
+  width: 25px;
+  height: 25px;
+}
+
+.platform-ai-trigger:focus-visible,
+.platform-ai-close:focus-visible,
+.platform-ai-query:focus-visible,
+.platform-ai-result:focus-visible {
+  outline: 3px solid rgba(32, 107, 196, 0.22);
+  outline-offset: 2px;
+}
+
+.platform-ai-dialog {
+  display: grid;
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
+  flex: 1 1 auto;
+  gap: 7px;
+  min-width: 0;
+  height: 100%;
+}
+
+.platform-ai-assistant.is-collapsed .platform-ai-dialog {
+  display: none;
+}
+
+.platform-ai-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 35px;
+}
+
+.platform-ai-kicker,
+.platform-ai-scope,
+.platform-ai-search-label {
+  color: var(--platform-ai-muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.platform-ai-head h2 {
+  margin: 1px 0 0;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.platform-ai-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  padding: 0;
+  border: 1px solid #d5e3f5;
+  border-radius: 50%;
+  background: #fff;
+  color: #526071;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.platform-ai-search {
+  display: grid;
+  gap: 5px;
+}
+
+.platform-ai-query {
+  width: 100%;
+  height: 58px;
+  min-height: 58px;
+  max-height: 58px;
+  resize: none;
+  padding: 8px 9px;
+  border: 1px solid #a9c4e6;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--platform-ai-ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.platform-ai-scope strong {
+  color: var(--platform-ai-ink);
+}
+
+.platform-ai-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.platform-ai-prompts button {
+  min-height: 25px;
+  padding: 3px 8px;
+  border: 1px solid var(--platform-ai-line);
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #526071;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.platform-ai-prompts button:hover {
+  border-color: #a9c4e6;
+  background: #eef4fb;
+}
+
+.platform-ai-answer {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid #dbe5f2;
+  border-radius: 8px;
+  background: #f7fbff;
+}
+
+.platform-ai-answer strong {
+  font-size: 12px;
+}
+
+.platform-ai-answer span,
+.platform-ai-empty {
+  color: var(--platform-ai-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.platform-ai-results {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.platform-ai-result {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--platform-ai-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--platform-ai-ink);
+  text-align: left;
+  text-decoration: none;
+}
+
+.platform-ai-result:hover {
+  border-color: #bfd2ea;
+  background: #fbfdff;
+  box-shadow: 0 8px 20px rgba(24, 36, 51, 0.08);
+}
+
+.platform-ai-result-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #eef4fb;
+  color: var(--platform-ai-blue-dark);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.platform-ai-result-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.platform-ai-result-main strong,
+.platform-ai-result-main em,
+.platform-ai-result-main span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-ai-result-main strong {
+  font-size: 12px;
+}
+
+.platform-ai-result-main em,
+.platform-ai-result-main span,
+.platform-ai-result-action {
+  color: var(--platform-ai-muted);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.platform-ai-result-action {
+  display: none;
+}
+
+.platform-ai-empty {
+  padding: 10px;
+  border: 1px dashed var(--platform-ai-line);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+@media (max-width: 860px) {
+  .platform-ai-assistant {
+    right: 14px;
+    bottom: 14px;
+    width: min(330px, calc(100vw - 40px));
+    height: min(540px, calc(100vh - 28px));
+  }
+}

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TXT 转 INI 工具</title>
+    <link rel="stylesheet" href="../assets/platform-assistant.css?v=20260618-all-pages-v3" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .tool-nav {
+            display: flex;
+            margin-bottom: 12px;
+        }
+        .back-button {
+            min-height: 36px;
+            padding: 7px 12px;
+            border: 1px solid #d8e0ea;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1a73e8;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            border-color: #1a73e8;
+            background: #edf3fb;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .header h1 {
+            color: #1a73e8;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 1.05em;
+        }
+        .upload-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .upload-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .file-card {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .file-card:hover {
+            border-color: #1a73e8;
+            background: #f8fbff;
+        }
+        .file-card.has-file {
+            border-style: solid;
+            border-color: #34a853;
+            background: #f0f9f4;
+        }
+        .file-card input[type="file"] {
+            display: none;
+        }
+        .file-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .file-card .filename {
+            font-size: 0.9em;
+            color: #666;
+            word-break: break-all;
+        }
+        .file-card .status {
+            font-size: 0.8em;
+            margin-top: 8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+        }
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1557b0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26,115,232,0.3);
+        }
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-success {
+            background: #34a853;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #2d8e47;
+        }
+        .preview-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            display: none;
+        }
+        .preview-section.active {
+            display: block;
+        }
+        .preview-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .preview-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #1a73e8;
+        }
+        .preview-card h4 {
+            color: #1a73e8;
+            margin-bottom: 8px;
+        }
+        .preview-card .stats {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .preview-card .data-preview {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85em;
+            color: #333;
+            word-break: break-all;
+            max-height: 80px;
+            overflow: hidden;
+        }
+        .result-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            display: none;
+            text-align: center;
+        }
+        .result-section.active {
+            display: block;
+        }
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        .result-info {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f9f4;
+            border-radius: 10px;
+            text-align: left;
+        }
+        .result-info p {
+            margin: 8px 0;
+            color: #333;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        .progress-bar.active {
+            display: block;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #1a73e8;
+            border-radius: 3px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+        .help-text {
+            background: #e3f2fd;
+            border-left: 4px solid #1a73e8;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #333;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        /* Align this standalone tool with the other conversion pages. */
+        :root {
+            --bg: #f5f7fa;
+            --panel: #ffffff;
+            --panel-alt: #fbfcfe;
+            --ink: #1f2933;
+            --muted: #687583;
+            --line: #d8e0ea;
+            --blue: #206bc4;
+            --blue-dark: #1557a8;
+            --green: #2f855a;
+            --amber: #b7791f;
+            --radius: 8px;
+            --shadow: 0 4px 18px rgba(24, 36, 51, 0.08);
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            padding: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-size: 14px;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .container {
+            max-width: 1180px;
+            padding: 20px;
+        }
+
+        .header,
+        .upload-section,
+        .preview-section,
+        .result-section {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 14px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .header h1 {
+            margin: 0 0 6px;
+            color: var(--blue);
+            font-size: 26px;
+            line-height: 1.2;
+        }
+
+        .header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .upload-section,
+        .preview-section,
+        .result-section {
+            margin-bottom: 14px;
+            padding: 16px;
+        }
+
+        .upload-section h2,
+        .preview-section h2 {
+            margin: 0 0 12px;
+            color: var(--ink);
+            font-size: 17px;
+        }
+
+        .help-text {
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border: 1px solid #cfe0f5;
+            border-left: 4px solid var(--blue);
+            border-radius: var(--radius);
+            background: #edf3fb;
+            color: var(--ink);
+            font-size: 14px;
+        }
+
+        .file-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .file-card {
+            min-height: 132px;
+            padding: 16px;
+            border: 1px dashed var(--line);
+            border-radius: var(--radius);
+            background: var(--panel-alt);
+            transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+        }
+
+        .file-card:hover {
+            border-color: var(--blue);
+            background: #f8fbff;
+            box-shadow: 0 8px 22px rgba(24, 36, 51, 0.08);
+        }
+
+        .file-card.has-file {
+            border-color: var(--green);
+            background: #f0f9f4;
+        }
+
+        .file-card .icon {
+            margin-bottom: 8px;
+            font-size: 2.2em;
+        }
+
+        .file-card .filename {
+            color: var(--muted);
+        }
+
+        .file-card .status {
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .status-waiting {
+            background: #fff7e6;
+            color: var(--amber);
+        }
+
+        .status-ok {
+            color: var(--green);
+        }
+
+        .btn {
+            min-height: 38px;
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .btn-primary {
+            border-color: var(--blue);
+            background: var(--blue);
+        }
+
+        .btn-primary:hover {
+            background: var(--blue-dark);
+            transform: none;
+            box-shadow: 0 8px 22px rgba(24, 36, 51, 0.12);
+        }
+
+        .btn-primary:disabled {
+            border-color: #cbd5df;
+            background: #cbd5df;
+        }
+
+        .btn-success {
+            border-color: var(--green);
+            background: var(--green);
+        }
+
+        .preview-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .preview-card {
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--blue);
+            border-radius: var(--radius);
+            background: var(--panel-alt);
+        }
+
+        .preview-card h4 {
+            color: var(--blue);
+        }
+
+        .preview-card .stats {
+            color: var(--muted);
+        }
+
+        .preview-card .data-preview {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            color: var(--ink);
+            font-size: 12px;
+        }
+
+        .success-icon {
+            margin-bottom: 10px;
+            font-size: 3em;
+        }
+
+        .result-info {
+            margin: 14px 0;
+            padding: 12px;
+            border: 1px solid #cdeed8;
+            border-radius: var(--radius);
+        }
+
+        .btn-group {
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .progress-bar {
+            margin: 14px 0;
+            border-radius: 999px;
+            background: #e7edf3;
+        }
+
+        .progress-fill {
+            border-radius: inherit;
+            background: var(--blue);
+        }
+
+        .footer {
+            padding: 16px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .file-grid,
+            .preview-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 620px) {
+            .container {
+                padding: 14px;
+            }
+
+            .header,
+            .upload-section,
+            .preview-section,
+            .result-section {
+                padding: 14px;
+            }
+
+            .file-grid,
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tool-nav">
+            <button class="back-button" type="button" onclick="goBackToToolList()">&larr; 返回工具入口</button>
+        </div>
+
+        <div class="header">
+            <div>
+                <h1>光影平衡调试</h1>
+                <p>将 4 个标准格式的 TXT 文件合并转换为 INI 配置文件</p>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <div class="help-text">
+                <strong>使用步骤：</strong>点击下方的卡片上传 TXT 文件（必须命名为 0.txt ~ 3.txt）→ 预览确认数据 → 生成并下载 INI 文件
+            </div>
+            
+            <h2>上传 TXT 文件</h2>
+            <div class="file-grid">
+                <div class="file-card" onclick="document.getElementById('file0').click()">
+                    <input type="file" id="file0" accept=".txt" onchange="handleFile(0, this)">
+                    <div class="icon">📄</div>
+                    <div class="filename">0.txt</div>
+                    <div class="status status-waiting" id="status0">等待上传</div>
+                </div>
+                <div class="file-card" onclick="document.getElementById('file1').click()">
+                    <input type="file" id="file1" accept=".txt" onchange="handleFile(1, this)">
+                    <div class="icon">📄</div>
+                    <div class="filename">1.txt</div>
+                    <div class="status status-waiting" id="status1">等待上传</div>
+                </div>
+                <div class="file-card" onclick="document.getElementById('file2').click()">
+                    <input type="file" id="file2" accept=".txt" onchange="handleFile(2, this)">
+                    <div class="icon">📄</div>
+                    <div class="filename">2.txt</div>
+                    <div class="status status-waiting" id="status2">等待上传</div>
+                </div>
+                <div class="file-card" onclick="document.getElementById('file3').click()">
+                    <input type="file" id="file3" accept=".txt" onchange="handleFile(3, this)">
+                    <div class="icon">📄</div>
+                    <div class="filename">3.txt</div>
+                    <div class="status status-waiting" id="status3">等待上传</div>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="btn btn-primary" id="generateBtn" onclick="generateINI()" disabled>
+                    🚀 生成 INI 文件
+                </button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <h2>数据预览</h2>
+            <div class="preview-grid" id="previewGrid"></div>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <div class="success-icon">✅</div>
+            <h2>生成成功！</h2>
+            <div class="result-info">
+                <p><strong>文件名：</strong>ldremap_cfg.ini</p>
+                <p><strong>总数据量：</strong><span id="totalCount">0</span> 个数字（4×256）</p>
+                <p><strong>文件大小：</strong><span id="fileSize">0</span> KB</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="downloadINI()">
+                    📥 下载 INI 文件
+                </button>
+                <button class="btn btn-primary" onclick="resetAll()">
+                    🔄 重新上传
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>TXT 转 INI 工具 v2.0 | 纯前端版本 | 无需安装 Python</p>
+        </div>
+    </div>
+
+    <script>
+        function goBackToToolList() {
+            if (window.history.length > 1) {
+                window.history.back();
+                return;
+            }
+            window.location.href = "../index.html#debug-converter";
+        }
+
+        // 存储文件数据
+        const filesData = {};
+        let generatedContent = '';
+
+        // 处理文件上传
+        function handleFile(index, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const numbers = extractNumbers(content);
+                
+                filesData[index] = {
+                    name: file.name,
+                    content: content,
+                    numbers: numbers
+                };
+
+                // 更新 UI
+                updateFileCard(index, file.name, numbers.length);
+                updatePreview();
+                checkAllFiles();
+            };
+            reader.readAsText(file);
+        }
+
+        // 从 TXT 内容提取数字
+        function extractNumbers(content) {
+            const lines = content.split('\n');
+            const numbers = [];
+            
+            // 跳过第 1、2 行和最后 1 行（数据在第 3-18 行，索引 2-17）
+            for (let i = 2; i < lines.length - 1 && i < 18; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // 移除行尾逗号，然后分割
+                const cleaned = line.replace(/,$/, '');
+                const values = cleaned.split(',');
+                
+                for (const v of values) {
+                    const num = parseInt(v.trim());
+                    if (!isNaN(num)) {
+                        numbers.push(num);
+                    }
+                }
+            }
+            
+            return numbers;
+        }
+
+        // 更新文件卡片状态
+        function updateFileCard(index, filename, count) {
+            const card = document.getElementById('file' + index).parentElement;
+            const status = document.getElementById('status' + index);
+            
+            card.classList.add('has-file');
+            status.className = 'status status-ok';
+            status.textContent = `✓ ${count} 个数字`;
+        }
+
+        // 更新预览
+        function updatePreview() {
+            const grid = document.getElementById('previewGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 4; i++) {
+                if (filesData[i]) {
+                    const nums = filesData[i].numbers;
+                    const preview = nums.slice(0, 20).join(', ') + (nums.length > 20 ? ', ...' : '');
+                    
+                    const card = document.createElement('div');
+                    card.className = 'preview-card';
+                    card.innerHTML = `
+                        <h4>曲线 ${i} (${filesData[i].name})</h4>
+                        <div class="stats">数据量：${nums.length} 个 | 范围：${Math.min(...nums)} - ${Math.max(...nums)}</div>
+                        <div class="data-preview">${preview}</div>
+                    `;
+                    grid.appendChild(card);
+                }
+            }
+            
+            if (Object.keys(filesData).length > 0) {
+                document.getElementById('previewSection').classList.add('active');
+            }
+        }
+
+        // 检查是否所有文件都已上传
+        function checkAllFiles() {
+            const allUploaded = [0, 1, 2, 3].every(i => filesData[i] && filesData[i].numbers.length > 0);
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = !allUploaded;
+        }
+
+        // 生成 INI 文件
+        function generateINI() {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            progressBar.classList.add('active');
+            progressFill.style.width = '30%';
+            
+            setTimeout(() => {
+                progressFill.style.width = '60%';
+                
+                setTimeout(() => {
+                    // 生成 INI 内容
+                    const lines = [];
+                    lines.push('[LDREMAP] ');
+                    
+                    let totalCount = 0;
+                    for (let i = 0; i < 4; i++) {
+                        const nums = filesData[i].numbers;
+                        totalCount += nums.length;
+                        const dataStr = nums.join(',');
+                        lines.push(`LDUserGammaCurve_${i} = {${dataStr}};`);
+                    }
+                    
+                    lines.push('');
+                    lines.push('');
+                    
+                    generatedContent = lines.join('\n');
+                    
+                    progressFill.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        // 显示结果
+                        document.getElementById('totalCount').textContent = totalCount;
+                        document.getElementById('fileSize').textContent = (generatedContent.length / 1024).toFixed(2);
+                        document.getElementById('resultSection').classList.add('active');
+                        
+                        // 滚动到结果
+                        document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+                    }, 300);
+                }, 300);
+            }, 300);
+        }
+
+        // 下载 INI 文件
+        function downloadINI() {
+            const blob = new Blob([generatedContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ldremap_cfg.ini';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 重置所有
+        function resetAll() {
+            // 清空数据
+            for (let i = 0; i < 4; i++) {
+                delete filesData[i];
+                document.getElementById('file' + i).value = '';
+                
+                const card = document.getElementById('file' + i).parentElement;
+                card.classList.remove('has-file');
+                
+                const status = document.getElementById('status' + i);
+                status.className = 'status status-waiting';
+                status.textContent = '等待上传';
+            }
+            
+            generatedContent = '';
+            
+            // 隐藏预览和结果
+            document.getElementById('previewSection').classList.remove('active');
+            document.getElementById('resultSection').classList.remove('active');
+            document.getElementById('progressBar').classList.remove('active');
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('generateBtn').disabled = true;
+            
+            document.getElementById('previewGrid').innerHTML = '';
+        }
+    </script>
+    <script src="../assets/platform-assistant.js?v=20260622-comfort-ppt-v2"></script>
+</body>
+</html>

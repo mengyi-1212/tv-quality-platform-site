@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>人眼舒适亮度模型</title>
+    <link rel="stylesheet" href="../assets/platform-assistant.css?v=20260618-all-pages-v3" />
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --panel-soft: #f8fafc;
+        --ink: #182433;
+        --muted: #667085;
+        --line: #dce3ea;
+        --blue: #206bc4;
+        --green: #2fb344;
+        --amber: #f59f00;
+        --red: #d63939;
+        --radius: 8px;
+        --shadow: 0 8px 24px rgba(24, 36, 51, 0.06);
+        font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .tool-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .back-button {
+        min-height: 36px;
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--blue);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .back-button:hover {
+        border-color: var(--blue);
+        background: #edf3fb;
+      }
+
+      .presentation-button {
+        border-color: #a9c7eb;
+        background: #eaf3ff;
+        color: var(--blue);
+      }
+
+      .presentation-download-button {
+        color: var(--muted);
+      }
+
+      .header,
+      .panel,
+      .result-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: end;
+        padding: 20px;
+        margin-bottom: 14px;
+      }
+
+      .eyebrow {
+        margin: 0 0 6px;
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 26px;
+        line-height: 1.2;
+      }
+
+      .header p:last-child,
+      .muted {
+        color: var(--muted);
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: #edf3fb;
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.4fr);
+        gap: 14px;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .panel-head h2 {
+        font-size: 17px;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 7px;
+      }
+
+      .field span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .control-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 86px;
+        gap: 10px;
+        align-items: center;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      input[type="number"],
+      select {
+        min-height: 38px;
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #ffffff;
+        color: var(--ink);
+        padding: 8px 10px;
+      }
+
+      .results {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .result-card {
+        padding: 14px;
+      }
+
+      .result-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+
+      .result-card strong {
+        font-size: 24px;
+        line-height: 1;
+      }
+
+      .result-card em {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-style: normal;
+        font-size: 12px;
+      }
+
+      .logic-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .logic-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-soft);
+        padding: 13px;
+      }
+
+      .logic-card h3 {
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .logic-card p,
+      .logic-card li {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .logic-card ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .decision {
+        margin-top: 14px;
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--blue);
+        border-radius: var(--radius);
+        background: #ffffff;
+        padding: 14px;
+      }
+
+      .decision h3 {
+        margin-bottom: 8px;
+      }
+
+      .decision p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .experiment-section {
+        margin-top: 14px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 14px;
+      }
+
+      .section-title h2 {
+        font-size: 18px;
+      }
+
+      .section-title p {
+        max-width: 760px;
+        margin-top: 6px;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .architecture-flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .flow-card,
+      .step-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-soft);
+        padding: 12px;
+      }
+
+      .flow-card strong,
+      .step-card strong {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--ink);
+      }
+
+      .flow-card span,
+      .step-card span {
+        display: block;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .steps-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        counter-reset: experiment-step;
+      }
+
+      .step-card {
+        position: relative;
+        padding-left: 48px;
+      }
+
+      .step-card::before {
+        counter-increment: experiment-step;
+        content: counter(experiment-step);
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        background: var(--blue);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .metric-table-wrap {
+        overflow-x: auto;
+      }
+
+      .metric-table {
+        width: 100%;
+        min-width: 820px;
+        border-collapse: collapse;
+      }
+
+      .metric-table th,
+      .metric-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .metric-table th {
+        color: var(--ink);
+        background: var(--panel-soft);
+        font-size: 12px;
+      }
+
+      .metric-table td {
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .output-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .wide-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .formula-card {
+        margin-top: 12px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--blue);
+        border-radius: var(--radius);
+        background: #ffffff;
+      }
+
+      .formula-card code {
+        display: block;
+        overflow-x: auto;
+        white-space: pre;
+        color: var(--ink);
+        font-family: Consolas, "SFMono-Regular", monospace;
+        line-height: 1.7;
+      }
+
+      .phase-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .phase-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-soft);
+        padding: 12px;
+      }
+
+      .phase-card em {
+        display: inline-flex;
+        margin-bottom: 8px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #edf3fb;
+        color: var(--blue);
+        font-style: normal;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .phase-card strong {
+        display: block;
+        margin-bottom: 7px;
+      }
+
+      .phase-card span {
+        display: block;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .compact-list {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .low {
+        color: var(--green);
+      }
+
+      .mid {
+        color: var(--blue);
+      }
+
+      .high {
+        color: var(--amber);
+      }
+
+      .risk {
+        color: var(--red);
+      }
+
+      @media (max-width: 900px) {
+        .header,
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .results,
+        .logic-grid,
+        .architecture-flow,
+        .steps-list,
+        .output-grid,
+        .wide-grid,
+        .phase-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <nav class="tool-nav">
+        <a class="back-button" href="../?v=20260612-eye-lr-system#lab">返回平台</a>
+        <a class="back-button presentation-button" href="comfort-brightness-presentation.html">打开项目汇报</a>
+        <a class="back-button presentation-download-button" href="../data/presentations/人眼舒适亮度模型项目汇报6.22.pptx" download>下载 PPT</a>
+      </nav>
+
+      <header class="header">
+        <div>
+          <p class="eyebrow">Experiment Design</p>
+          <h1>人眼舒适亮度模型</h1>
+          <p>基于人眼舒适感、环境照度、画面 APL、观看时段与内容类型，给出推荐亮度、峰值约束和调光策略。</p>
+        </div>
+        <span class="status-pill">实验设计 v0.3</span>
+      </header>
+
+      <section class="experiment-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Core Target</p>
+            <h2>实验总目标与理论基础</h2>
+            <p>建立一套结合人眼生理特性、环境光、电视画面内容和用户反馈的动态舒适亮度感知模型。模型目标不是简单回答“电视应该多亮”，而是输出可嵌入电视系统的亮度控制参数。</p>
+          </div>
+          <span class="status-pill">Lr 感知亮度路线</span>
+        </div>
+
+        <div class="wide-grid">
+          <article class="logic-card">
+            <h3>理论基础</h3>
+            <p>仅用物理亮度无法反映人眼真实感受。感知亮度还受环境光、周围亮度、瞳孔直径、视觉适应和观看时长影响。因此模型以“视网膜成像亮度 Lr”为中间变量：Lr 与感知亮度近似线性相关，舒适度与 Lr 呈高斯型最佳区间。</p>
+          </article>
+          <article class="logic-card">
+            <h3>最终控制参数</h3>
+            <ul class="compact-list">
+              <li>Backlight / OLED Light、SDR Gamma、HDR Tone Mapping</li>
+              <li>高光压缩、字幕柔光、暗部提升、亮度变化速度</li>
+              <li>用户偏好偏移量，用于长期个性化学习</li>
+            </ul>
+          </article>
+        </div>
+
+      </section>
+
+      <section class="experiment-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Research Questions</p>
+            <h2>核心研究问题与实验假设</h2>
+            <p>实验需要证明：环境光并非只改变屏幕亮度需求，而是通过瞳孔、视觉适应和内容结构共同影响感知亮度与舒适度。</p>
+          </div>
+        </div>
+
+        <div class="metric-table-wrap">
+          <table class="metric-table">
+            <thead>
+              <tr>
+                <th>编号</th>
+                <th>研究问题</th>
+                <th>对应假设</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>RQ1</td>
+                <td>同样电视亮度在不同环境光下，用户感知亮度如何变化？</td>
+                <td>固定屏幕亮度时，环境照度越高，感知亮度越低。</td>
+              </tr>
+              <tr>
+                <td>RQ2/RQ3</td>
+                <td>环境光是否主要通过瞳孔直径影响感知亮度，Lr 能否预测感知亮度？</td>
+                <td>环境光影响部分由瞳孔直径中介；Lr = f(屏幕亮度 × 瞳孔面积) 可显著预测感知亮度。</td>
+              </tr>
+              <tr>
+                <td>RQ4</td>
+                <td>舒适度是否存在最佳 Lr 区间，而不是亮度越低越舒服？</td>
+                <td>视觉舒适度与 Lr 呈 U 型或高斯关系，存在 Lr_opt。</td>
+              </tr>
+              <tr>
+                <td>RQ5/RQ6</td>
+                <td>APL、峰值亮度、高光面积、字幕亮度和动态调光如何影响舒适度？</td>
+                <td>暗环境下高 APL、大面积高光、白字幕会降低舒适度；加入内容特征的动态模型优于传统环境光自动亮度。</td>
+              </tr>
+              <tr>
+                <td>RQ7</td>
+                <td>用户长期手动调节行为能否学习为个体偏好？</td>
+                <td>加入用户偏好学习后，手动调节次数下降，舒适度评分提升。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="experiment-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">System Architecture</p>
+            <h2>实验体系架构</h2>
+            <p>这不是单一实验，而是一套从基础生理建模到产品算法验证的分阶段体系。每个阶段输出一个可进入下一阶段的模型组件。</p>
+          </div>
+        </div>
+
+        <div class="phase-grid">
+          <article class="phase-card">
+            <em>阶段 0</em>
+            <strong>设备校准与预实验</strong>
+            <span>确定亮度范围、环境光范围、问卷有效性、样片和评分流程，避免主实验条件过多。</span>
+          </article>
+          <article class="phase-card">
+            <em>阶段 1</em>
+            <strong>静态感知亮度建模</strong>
+            <span>建立环境光、屏幕亮度、瞳孔直径、Lr 和感知亮度之间的基础关系。</span>
+          </article>
+          <article class="phase-card">
+            <em>阶段 2</em>
+            <strong>视觉舒适度函数建模</strong>
+            <span>验证 Lr 是否存在最佳舒适区间，并拟合 Comfort(Lr) 的高斯函数。</span>
+          </article>
+          <article class="phase-card">
+            <em>阶段 3</em>
+            <strong>动态视频舒适度实验</strong>
+            <span>把静态 Lr 扩展到真实电视内容，加入 APL、高光、字幕、亮度跳变和疲劳累积。</span>
+          </article>
+          <article class="phase-card">
+            <em>阶段 4</em>
+            <strong>产品算法 A/B 验证</strong>
+            <span>对比手动亮度、传统自动亮度、环境光+APL 和完整动态舒适亮度模型。</span>
+          </article>
+          <article class="phase-card">
+            <em>阶段 5</em>
+            <strong>个性化学习验证</strong>
+            <span>用 7-14 天家庭测试学习用户偏好偏移量，验证手动调节次数是否减少。</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="experiment-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Model Architecture</p>
+            <h2>模型架构</h2>
+            <p>把人眼舒适亮度模型拆成输入、场景识别、舒适区间计算、约束判定和输出执行五层，实验数据用于校准每一层的权重和边界条件。</p>
+          </div>
+          <span class="status-pill">从实验到调试策略</span>
+        </div>
+
+        <div class="architecture-flow">
+          <article class="flow-card">
+            <strong>1. 输入层</strong>
+            <span>采集环境照度、屏幕实测亮度、APL、内容类型、观看距离、观看时长和面板峰值能力。</span>
+          </article>
+          <article class="flow-card">
+            <strong>2. 场景识别层</strong>
+            <span>按暗室、常规客厅、明亮客厅，以及电影、体育、游戏、HDR 高光内容做场景分组。</span>
+          </article>
+          <article class="flow-card">
+            <strong>3. 舒适计算层</strong>
+            <span>建立环境照度到白场亮度的对数关系，并用 APL 修正峰值亮度和持续亮度刺激。</span>
+          </article>
+          <article class="flow-card">
+            <strong>4. 约束判定层</strong>
+            <span>用眩光、眼疲劳、暗部可读性、高光保留和热保护风险判断当前策略是否可用。</span>
+          </article>
+          <article class="flow-card">
+            <strong>5. 输出执行层</strong>
+            <span>输出 SDR 白场、HDR 峰值上限、背光档位、APL 动态压制曲线和回归验证规则。</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="experiment-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Experiment Steps</p>
+            <h2>清晰实验步骤</h2>
+            <p>实验目标是找到不同环境、APL 和内容类型下的舒适亮度区间，再把主观舒适度与客观亮度数据拟合成可调用的调试模型。</p>
+          </div>
+        </div>
+
+        <div class="steps-list">
+          <article class="step-card">
+            <strong>实验准备</strong>
+            <span>固定观看距离、座位高度和屏幕模式；关闭自动节能、动态对比度等会干扰亮度的功能，记录面板型号和峰值能力。</span>
+          </article>
+          <article class="step-card">
+            <strong>设备校准</strong>
+            <span>用照度计记录环境 lux，用亮度计记录白场、10% 窗口峰值和典型场景亮度，保证所有测试在同一测试位置完成。</span>
+          </article>
+          <article class="step-card">
+            <strong>环境分组</strong>
+            <span>设置暗室、夜间弱光、常规客厅、明亮客厅四类环境，建议 lux 档位为 0-5、20-50、100-200、300-600。</span>
+          </article>
+          <article class="step-card">
+            <strong>内容样本</strong>
+            <span>准备低 APL 暗场、中 APL 人物、高清体育、高 APL 雪景/网页、HDR 高光五类样片，覆盖舒适和刺激两类极端场景。</span>
+          </article>
+          <article class="step-card">
+            <strong>亮度扫描</strong>
+            <span>在每个环境和内容组合下，按 80、120、160、220、300、400、520 nit 等白场阶梯扫描，并同步调整 HDR 峰值上限。</span>
+          </article>
+          <article class="step-card">
+            <strong>主观评分</strong>
+            <span>每档观看 60-120 秒，记录舒适度、眩光感、眼疲劳、暗部可读性、高光冲击力，评分建议采用 1-5 分。</span>
+          </article>
+          <article class="step-card">
+            <strong>模型拟合</strong>
+            <span>筛选舒适度高且眩光/疲劳低的亮度点，拟合环境照度、APL、峰值能力和内容类型对推荐亮度的权重。</span>
+          </article>
+          <article class="step-card">
+            <strong>回归验证</strong>
+            <span>用未参与拟合的新片源做验证，连续观看 20-30 分钟，确认亮度策略不会引发持续疲劳、暗部丢失或高光压缩。</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="experiment-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Detailed Protocol</p>
+            <h2>阶段实验步骤明细</h2>
+            <p>完整实验按“预实验 -> 静态 Lr -> 舒适函数 -> 动态视频 -> 产品 A/B -> 个性化学习”推进。主实验建议至少 60 人，按年龄层分组，产品验证可扩展到 100-200 人。</p>
+          </div>
+        </div>
+
+        <div class="metric-table-wrap">
+          <table class="metric-table">
+            <thead>
+              <tr>
+                <th>实验要素</th>
+                <th>推荐设置</th>
+                <th>目的</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>被试设计</td>
+                <td>预实验 12-16 人；主实验 60-90 人；产品验证 100-200 人。年龄层建议 18-30、31-50、51-70 岁各 20-30 人。</td>
+                <td>覆盖瞳孔反应、年龄、观看偏好和眼疲劳差异。</td>
+              </tr>
+              <tr>
+                <td>纳入/排除</td>
+                <td>裸眼或矫正视力正常、无严重色觉异常；排除严重干眼、青光眼、白内障、近期眼科手术或服用影响瞳孔药物者。</td>
+                <td>降低生理异常对 Lr 和舒适评分的干扰。</td>
+              </tr>
+              <tr>
+                <td>显示设备</td>
+                <td>OLED 55/65 英寸用于暗室和 HDR 舒适度；Mini LED/LCD 75 英寸用于高亮客厅、体育、新闻和白天场景。</td>
+                <td>覆盖 SDR/HDR、暗场、高峰值和大面积高亮能力。</td>
+              </tr>
+              <tr>
+                <td>测量设备</td>
+                <td>亮度计/色度计、照度计、光谱仪、眼动仪、环境亮度相机、观看距离测量工具和同步采集电脑。</td>
+                <td>同步记录屏幕亮度、环境光、瞳孔、眨眼、注视和评分。</td>
+              </tr>
+              <tr>
+                <td>房间环境</td>
+                <td>15-25 m2 可控实验室，中性灰墙面，可遮光窗口，可调光/调色温照明，观看距离 2.2-2.8 m。</td>
+                <td>让环境光、周围亮度和背墙亮度可重复。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="steps-list" style="margin-top: 12px;">
+          <article class="step-card">
+            <strong>阶段 0：校准与预实验</strong>
+            <span>校准亮度计、照度计和眼动仪；确认环境光 0/5/50/200/500 lx、屏幕亮度 30/60/100/150/250/400 cd/m2、问卷量表和样片难度。</span>
+          </article>
+          <article class="step-card">
+            <strong>阶段 1：静态感知亮度</strong>
+            <span>使用灰阶、白屏、暗灰画面，在不同环境光和屏幕亮度下记录瞳孔直径、眨眼、注视点、感知亮度与舒适评分，拟合 Lr -> PerceivedBrightness。</span>
+          </article>
+          <article class="step-card">
+            <strong>阶段 2：舒适函数</strong>
+            <span>在阶段 1 基础上延长单条件观看到 60 秒，重点拟合 Comfort(Lr)=Cmax*exp(-((Lr-Lr_opt)^2/2σ^2))，并按年龄和环境分组估计 Lr_opt。</span>
+          </article>
+          <article class="step-card">
+            <strong>阶段 3：动态视频</strong>
+            <span>准备暗场电影、亮场电影、HDR 高光、新闻综艺、体育、动画、游戏 UI、暗背景白字幕共 24 个片段，提取 APL、Peak、P95、高光面积、字幕亮度和亮度跳变。</span>
+          </article>
+          <article class="step-card">
+            <strong>阶段 4：产品 A/B 验证</strong>
+            <span>随机顺序对比手动亮度、传统环境光自动亮度、环境光+APL、完整动态舒适亮度模型。每种策略观看 12-15 分钟，允许用户手动调节。</span>
+          </article>
+          <article class="step-card">
+            <strong>阶段 5：个性化学习</strong>
+            <span>开展 7-14 天家庭测试，采集环境光、内容类型、APL、HDR/SDR、字幕状态、手动调节方向和幅度，学习 UserOffset。</span>
+          </article>
+        </div>
+
+        <div class="formula-card">
+          <code>单次 trial 流程：
+1. 切换环境光并适应 60-120 秒
+2. 显示测试画面或视频片段 20-60 秒
+3. 同步记录瞳孔直径、眨眼、注视点、屏幕亮度和环境亮度
+4. 用户评分：感知亮度、舒适度、刺眼感、清晰度、持续观看意愿
+5. 休息 10-30 秒，进入下一条件</code>
+        </div>
+      </section>
+
+      <section class="experiment-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Data & Output</p>
+            <h2>记录指标与实验输出</h2>
+            <p>实验记录需要同时保留客观亮度数据和主观体验评分，避免只按亮度数值调试而忽略人眼舒适边界。</p>
+          </div>
+        </div>
+
+        <div class="metric-table-wrap">
+          <table class="metric-table">
+            <thead>
+              <tr>
+                <th>模块</th>
+                <th>记录内容</th>
+                <th>判定口径</th>
+                <th>输出结果</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>环境条件</td>
+                <td>lux、观看距离、观看时长、环境光方向、是否有反射光</td>
+                <td>环境越亮，白场目标可上移；暗室需要收紧峰值和字幕亮度。</td>
+                <td>环境分组和推荐白场基线</td>
+              </tr>
+              <tr>
+                <td>画面特征</td>
+                <td>APL、暗场比例、高光面积、字幕/菜单亮度、内容类型</td>
+                <td>低 APL 保留峰值，高 APL 限制持续刺激，字幕避免局部刺眼。</td>
+                <td>APL 动态亮度约束曲线</td>
+              </tr>
+              <tr>
+                <td>客观亮度</td>
+                <td>SDR 白场、10% 峰值、Real Scene、功耗、热保护触发点</td>
+                <td>满足舒适区间，同时不能牺牲暗部可读性和 HDR 高光层次。</td>
+                <td>白场、峰值、背光档位建议</td>
+              </tr>
+              <tr>
+                <td>主观体验</td>
+                <td>舒适度、眩光、眼疲劳、暗部可读性、高光冲击力</td>
+                <td>舒适度 ≥4 且眩光/疲劳 ≤2 的档位优先进入模型。</td>
+                <td>舒适亮度窗口和风险阈值</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="output-grid">
+          <article class="flow-card">
+            <strong>调试交付物</strong>
+            <span>输出不同环境和内容下的 SDR 白场、HDR 峰值上限、背光档位、APL 限制曲线。</span>
+          </article>
+          <article class="flow-card">
+            <strong>验证交付物</strong>
+            <span>输出主观评分表、客观亮度记录表、模型拟合结果和异常场景截图。</span>
+          </article>
+          <article class="flow-card">
+            <strong>应用结论</strong>
+            <span>明确夜间舒适、常规客厅、明亮客厅三类默认策略，以及高亮风险场景的保护规则。</span>
+          </article>
+        </div>
+
+        <div class="metric-table-wrap" style="margin-top: 12px;">
+          <table class="metric-table">
+            <thead>
+              <tr>
+                <th>模块</th>
+                <th>关键内容</th>
+                <th>验收标准</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>数据字段</td>
+                <td>UserID、AgeGroup、AmbientLux、SurroundLuminance、ScreenLuminance、APL、Peak、P95、BrightAreaRatio、SubtitleLuminance、PupilDiameter、BlinkRate、ComfortScore、GlareScore、ManualAdjustmentAmount。</td>
+                <td>每条记录可按 1 秒或 5 秒粒度回放，并能关联主观评分。</td>
+              </tr>
+              <tr>
+                <td>统计分析</td>
+                <td>混合效应模型、环境光 -> 瞳孔 -> 感知亮度中介分析、Lr 模型拟合、Comfort 高斯函数拟合、重复测量 ANOVA。</td>
+                <td>Lr 模型解释力优于单独 ScreenLuminance；动态模型舒适度显著优于传统自动亮度。</td>
+              </tr>
+              <tr>
+                <td>模型评估</td>
+                <td>70% 训练、15% 验证、15% 测试，按用户维度隔离，避免同一用户同时进入训练集和测试集。</td>
+                <td>舒适/不舒适分类 AUC > 0.80；手动调节次数下降 >20%；刺眼评分下降 >15%。</td>
+              </tr>
+              <tr>
+                <td>MVP</td>
+                <td>20 人、4 个环境光、5 类内容，对比传统自动亮度和动态舒适亮度模型。输入 AmbientLux、APL、Peak、BrightAreaRatio、SubtitleLuminance、PupilDiameter/PupilEstimate。</td>
+                <td>输出目标屏幕亮度、高光压缩、字幕柔光、亮度变化速度，先证明项目价值。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="decision">
+          <h3>一句话总结实验逻辑</h3>
+          <p>实验不是在找“电视应该多亮”，而是在找不同环境、不同画面和不同用户适应状态下，什么样的视网膜成像亮度 Lr 最舒适；再反推电视应该如何动态调节亮度、高光、字幕和暗部细节。</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="../assets/platform-assistant.js?v=20260622-comfort-ppt-v2"></script>
+  </body>
+</html>
